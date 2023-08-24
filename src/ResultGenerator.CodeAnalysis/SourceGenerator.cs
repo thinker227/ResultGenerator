@@ -78,7 +78,7 @@ public sealed class SourceGenerator : IIncrementalGenerator
             .AsEquatableArray();
 
         return new(
-            symbol.Name,
+            name,
             values);
     }
 
