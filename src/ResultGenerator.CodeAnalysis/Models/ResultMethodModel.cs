@@ -15,5 +15,5 @@ internal readonly record struct ValueParameter(
     ParameterType Type);
 
 internal readonly record struct ParameterType(
-    string FullyQualifiedMetadataName,
+    string FullyQualifiedName,
     bool IsNullable);
