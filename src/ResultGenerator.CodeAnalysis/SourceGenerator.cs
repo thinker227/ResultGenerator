@@ -64,7 +64,7 @@ public sealed class SourceGenerator : IIncrementalGenerator
         // Only one result specifier is allowed per method.
         if (resultAttributeLists is not [var resultAttributeList]) return null;
 
-        resultAttributeList.Attributes
+        var values = resultAttributeList.Attributes
             .Select(attribute => GetResultValue(
                 attribute,
                 ctx.SemanticModel))
@@ -74,8 +74,7 @@ public sealed class SourceGenerator : IIncrementalGenerator
 
         return new(
             symbol.Name,
-            ImmutableArray<ResultValue>.Empty
-                .AsEquatableArray());
+            values);
     }
     
     private static ResultValue? GetResultValue(
@@ -138,7 +137,7 @@ public sealed class SourceGenerator : IIncrementalGenerator
             symbol.IsReferenceType;
 
         return new(
-            symbol.MetadataName,
+            symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
             isNullable);
     }
 }
