@@ -54,8 +54,18 @@ public sealed class SourceGenerator : IIncrementalGenerator
     private static ResultMethod? GetResultMethod(
         GeneratorAttributeSyntaxContext ctx)
     {
+        if (ctx.Attributes is not [var attribute]) return null;
         var node = (MethodDeclarationSyntax)ctx.TargetNode;
         var symbol = (IMethodSymbol)ctx.TargetSymbol;
+
+        if (GetAttributeCtorArgs(attribute) is not AttributeCtorArgs args) return null;
+
+        var name = args switch
+        {
+            AttributeCtorArgs.Empty => symbol.Name,
+            AttributeCtorArgs.WithTypeName x => x.TypeName,
+            _ => throw new InvalidOperationException(),
+        };
 
         var resultAttributeLists = node.AttributeLists
             .Where(attribute => attribute.Target?.Identifier.Text == "result")
@@ -76,6 +86,18 @@ public sealed class SourceGenerator : IIncrementalGenerator
             symbol.Name,
             values);
     }
+
+    private static AttributeCtorArgs? GetAttributeCtorArgs(AttributeData attribute) => attribute.ConstructorArguments switch
+    {
+        [] => new AttributeCtorArgs.Empty(),
+
+        [{
+            Kind: TypedConstantKind.Primitive,
+            Value: string typeName,
+        }] => new AttributeCtorArgs.WithTypeName(typeName),
+        
+        _ => null
+    };
     
     private static ResultValue? GetResultValue(
         AttributeSyntax syntax,
