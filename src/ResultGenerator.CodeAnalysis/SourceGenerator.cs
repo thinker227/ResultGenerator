@@ -60,12 +60,7 @@ public sealed class SourceGenerator : IIncrementalGenerator
 
         if (GetAttributeCtorArgs(attribute) is not AttributeCtorArgs args) return null;
 
-        var name = args switch
-        {
-            AttributeCtorArgs.Empty => symbol.Name,
-            AttributeCtorArgs.WithTypeName x => x.TypeName,
-            _ => throw new InvalidOperationException(),
-        };
+        var name = GetResultTypeName(args, symbol);
 
         var resultAttributeLists = node.AttributeLists
             .Where(attribute => attribute.Target?.Identifier.Text == "result")
@@ -99,6 +94,15 @@ public sealed class SourceGenerator : IIncrementalGenerator
         _ => null
     };
     
+    private static string GetResultTypeName(
+        AttributeCtorArgs args,
+        IMethodSymbol method) => args switch
+    {
+        AttributeCtorArgs.Empty => method.Name + "Result",
+        AttributeCtorArgs.WithTypeName x => x.TypeName,
+        _ => throw new InvalidOperationException(),
+    };
+
     private static ResultValue? GetResultValue(
         AttributeSyntax syntax,
         SemanticModel semanticModel)
