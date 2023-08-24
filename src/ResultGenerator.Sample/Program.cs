@@ -13,7 +13,7 @@ internal static class C
         throw new NotImplementedException();
 
     [ReturnsResult]
-    [result: NotFound, Ok<Person>(Value)]
+    [result: NotFound, Ok(Value<Person>)]
     public static void GetPerson(string name) =>
         throw new NotImplementedException();
 
