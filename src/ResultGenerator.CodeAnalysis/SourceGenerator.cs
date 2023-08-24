@@ -1,7 +1,5 @@
-using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using ResultGenerator.Helpers;
 using ResultGenerator.Models;
 
 namespace ResultGenerator;
@@ -16,7 +14,7 @@ public sealed class SourceGenerator : IIncrementalGenerator
                 "ResultGenerator.ReturnsResultAttribute",
                 (node, _) => node is MethodDeclarationSyntax,
                 (syntaxCtx, _) =>
-                    GetResultType(syntaxCtx))
+                    ResultType.Create(syntaxCtx))
             .Where(model => model is not null)
             .Select((model, _) => model!.Value);
 
@@ -49,121 +47,5 @@ public sealed class SourceGenerator : IIncrementalGenerator
             }
             """");
         });
-    }
-
-    private static ResultType? GetResultType(
-        GeneratorAttributeSyntaxContext ctx)
-    {
-        if (ctx.Attributes is not [var attribute]) return null;
-        var node = (MethodDeclarationSyntax)ctx.TargetNode;
-        var symbol = (IMethodSymbol)ctx.TargetSymbol;
-
-        if (GetAttributeCtorArgs(attribute) is not AttributeCtorArgs args) return null;
-
-        var name = GetResultTypeName(args, symbol);
-
-        var resultAttributeLists = node.AttributeLists
-            .Where(attribute => attribute.Target?.Identifier.Text == "result")
-            .ToImmutableArray();
-
-        // Only one result specifier is allowed per method.
-        if (resultAttributeLists is not [var resultAttributeList]) return null;
-
-        var values = resultAttributeList.Attributes
-            .Select(attribute => GetResultValue(
-                attribute,
-                ctx.SemanticModel))
-            .NotNull()
-            .ToImmutableArray()
-            .AsEquatableArray();
-
-        return new(
-            name,
-            values);
-    }
-
-    private static AttributeCtorArgs? GetAttributeCtorArgs(AttributeData attribute) => attribute.ConstructorArguments switch
-    {
-        [] => new AttributeCtorArgs.Empty(),
-
-        [{
-            Kind: TypedConstantKind.Primitive,
-            Value: string typeName,
-        }] => new AttributeCtorArgs.WithTypeName(typeName),
-        
-        _ => null
-    };
-    
-    private static string GetResultTypeName(
-        AttributeCtorArgs args,
-        IMethodSymbol method) => args switch
-    {
-        AttributeCtorArgs.Empty => method.Name + "Result",
-        AttributeCtorArgs.WithTypeName x => x.TypeName,
-        _ => throw new InvalidOperationException(),
-    };
-
-    private static ResultValue? GetResultValue(
-        AttributeSyntax syntax,
-        SemanticModel semanticModel)
-    {
-        // Names other than simple names are not supported.
-        if (syntax.Name is not IdentifierNameSyntax
-        {
-            Identifier.Text: var name
-        })
-            return null;
-
-        var parameters = syntax.ArgumentList?.Arguments
-            .Select(arg => GetParameter(arg, semanticModel))
-            .NotNull()
-            .ToImmutableArray()
-            .AsEquatableArray()
-            ?? ImmutableArray<ValueParameter>.Empty.AsEquatableArray();
-        
-        return new(name, parameters);
-    }
-
-    private static ValueParameter? GetParameter(
-        AttributeArgumentSyntax argument,
-        SemanticModel semanticModel)
-    {
-        if (argument.Expression is not GenericNameSyntax
-        {
-            Identifier.Text: var name,
-            TypeArgumentList.Arguments: [var typeSyntax]
-        })
-            return null;
-
-        if (GetParameterType(typeSyntax, semanticModel) is not ParameterType type)
-            return null;
-
-        return new(name, type);
-    }
-
-    private static ParameterType? GetParameterType(
-        TypeSyntax syntax,
-        SemanticModel semanticModel)
-    {
-        var position = syntax.GetLocation().SourceSpan.Start;
-        // This is probably bad.
-        var symbolInfo = semanticModel.GetSpeculativeSymbolInfo(
-            position,
-            syntax,
-            SpeculativeBindingOption.BindAsTypeOrNamespace);
-
-        if (symbolInfo.Symbol is not INamedTypeSymbol symbol) return null;
-
-        // If the type is nullable (i.e. a ? should be appended to it)
-        // then the type syntax has to be a NullableTypeSyntax
-        // and the type itself has to be a reference type,
-        // otherwise it would refer to Nullable<T>.
-        var isNullable =
-            syntax is NullableTypeSyntax &&
-            symbol.IsReferenceType;
-
-        return new(
-            symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-            isNullable);
     }
 }
