@@ -22,6 +22,14 @@ public sealed class ReturnsResultAttribute : Attribute
 {
     #pragma warning disable IDE0060
 
+    // Tried using `string? typeName = null`, but that causes the compiler
+    // to make `[ReturnsResult]` into `[ReturnsResult(null)]` which causes issues.
+
+    /// <summary>
+    /// Initializes a new <see cref="ReturnsResultAttribute"/> instance.
+    /// </summary>
+    public ReturnsResultAttribute() {}
+
     /// <summary>
     /// Initializes a new <see cref="ReturnsResultAttribute"/> instance.
     /// </summary>
@@ -31,5 +39,5 @@ public sealed class ReturnsResultAttribute : Attribute
     /// If not specified, the generated type name will be
     /// the name of the target method + <c>Result</c>.
     /// </param>
-    public ReturnsResultAttribute(string? typeName = null) {}
+    public ReturnsResultAttribute(string typeName) {}
 }
