@@ -27,7 +27,6 @@ public class Tests
         using System;
         using ResultGenerator;
 
-        #pragma warning disable CS0658 // Disable invalid attribute target warnings.
         public sealed class PersonService
         {
             [ReturnsResult]
@@ -71,7 +70,6 @@ public class Tests
         using System;
         using ResultGenerator;
 
-        #pragma warning disable CS0658 // Disable invalid attribute target warnings.
         public sealed class PersonService
         {
             [ReturnsResult("GetPersonResult")]
