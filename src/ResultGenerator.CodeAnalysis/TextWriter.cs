@@ -60,6 +60,9 @@ internal sealed class TextWriter
             builder.Append("\n\n");
 
             builder.Sections("\n", type.Values, WriteIsProperties);
+            builder.Append("\n\n");
+
+            builder.Sections("\n", type.Values, WriteTryAsMethods);
             builder.AppendLine();
         }
     }
@@ -133,6 +136,57 @@ internal sealed class TextWriter
         var index = valueIndicies[value];
 
         builder.Append($"public bool Is{value.Name} => this._flag == {index};");
+    }
+
+    private void WriteTryAsMethods(ResultValue value)
+    {
+        if (value.Parameters.IsEmpty)
+        {
+            builder.Append($"// Variant {value.Name} has no data to try get.");
+            return;
+        }
+
+        var index = valueIndicies[value];
+
+        builder.Append($"public bool TryAs{value.Name}(");
+
+        // foreach (var parameter in value.Parameters)
+        // {
+            
+        // }
+
+        builder.Sections(", ", value.Parameters, parameter =>
+        {
+            var typeText = GetTypeString(parameter.Type);
+            var parameterName = GetParameterName(parameter.Name);
+            builder.Append($"out {typeText} {parameterName}");
+        });
+
+        builder.AppendLine("""
+        )
+        {
+        """);
+        builder.Indent();
+
+        if (value.Parameters is [var parameter])
+        {
+            builder.Append(GetParameterName(parameter.Name));
+
+            var parameterName = GetParameterName(parameter.Name);
+        }
+        else
+        {
+            builder.Append($"({GetParameterNameListText(value.Parameters)})");
+        }
+        
+        var fieldName = GetFieldName(value.Name);
+        builder.AppendLine($"""
+         = this.{fieldName};
+        return this._flag == {index};
+        """);
+
+        builder.Unindent();
+        builder.Append("""}""");
     }
 
     private static string GetParameterName(string name) =>
