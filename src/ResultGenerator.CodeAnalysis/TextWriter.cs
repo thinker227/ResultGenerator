@@ -52,16 +52,14 @@ internal sealed class TextWriter
             """);
 
             builder.Sections("\n", type.Values, WriteField);
-            builder.AppendLine();
-
-            builder.Append("""
-            
-            
-            """);
+            builder.Append("\n\n");
 
             WriteCtor();
 
             builder.Sections("\n", type.Values, WriteCreateMethod);
+            builder.Append("\n\n");
+
+            builder.Sections("\n", type.Values, WriteIsProperties);
             builder.AppendLine();
         }
     }
@@ -128,6 +126,13 @@ internal sealed class TextWriter
         var parameterNames = GetParameterNameListText(value.Parameters);
 
         builder.Append($"({parameters}) => new({index}, {valueParameterName}: ({parameterNames}));");
+    }
+
+    private void WriteIsProperties(ResultValue value)
+    {
+        var index = valueIndicies[value];
+
+        builder.Append($"public bool Is{value.Name} => this._flag == {index};");
     }
 
     private static string GetParameterName(string name) =>
