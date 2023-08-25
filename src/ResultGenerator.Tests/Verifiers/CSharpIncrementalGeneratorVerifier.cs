@@ -53,7 +53,10 @@ internal static partial class CSharpIncrementalGeneratorVerifier<TIncrementalGen
 
         foreach ((string filename, string content) generatedSource in generatedSources)
         {
-            test.TestState.GeneratedSources.Add((typeof(TIncrementalGenerator), generatedSource.filename, SourceText.From(generatedSource.content, Encoding.UTF8)));
+            test.TestState.GeneratedSources.Add((typeof(TIncrementalGenerator), generatedSource.filename, SourceText.From(
+                // Replace line endings because the files the compiler emits use system line endings.
+                generatedSource.content.ReplaceLineEndings(),
+                Encoding.UTF8)));
         }
 
         test.ExpectedDiagnostics.AddRange(diagnostics);
