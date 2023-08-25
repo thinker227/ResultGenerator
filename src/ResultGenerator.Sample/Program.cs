@@ -1,9 +1,19 @@
-﻿using ResultGenerator;
+﻿using System.Diagnostics;
+using ResultGenerator;
 
 var personService = new PersonService();
 
 personService.CreatePerson("Max", 22);
-personService.CreatePerson("Susie", 29);
+
+var maxResult = personService.GetPersonByName("Max");
+Debug.Assert(maxResult.IsOk);
+
+maxResult.TryAsOk(out var max);
+Debug.Assert(max!.Name == "Max");
+Debug.Assert(max!.Age == 22);
+
+var susie = personService.GetPersonByName("Susie");
+Debug.Assert(susie.IsNotFound);
 
 public sealed class PersonService
 {
