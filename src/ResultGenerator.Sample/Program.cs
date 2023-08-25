@@ -1,42 +1,33 @@
 ﻿using ResultGenerator;
 
-Console.WriteLine("Hello, World!");
+var personService = new PersonService();
+
+personService.CreatePerson("Max", 22);
+personService.CreatePerson("Susie", 29);
 
 public sealed class PersonService
 {
-    private readonly Dictionary<string, Person> people = new()
-    {
-        ["Max"] = new("Max", 22),
-        ["Susie"] = new("Susie", 29),
-    };
+    private readonly Dictionary<string, Person> people = new();
 
     [ReturnsResult]
     [result: Created, DuplicateName]
-    // TODO: Update void to CreatePersonResult once that bug is fixed.
-    public void CreatePerson(string name, int age)
+    public CreatePersonResult CreatePerson(string name, int age)
     {
         var success = people.TryAdd(name, new(name, age));
 
-        // return success
-        //     ? CreatePersonResult.Created()
-        //     : CreatePersonResult.DuplicateName();
+        return success
+            ? CreatePersonResult.Created()
+            : CreatePersonResult.DuplicateName();
     }
 
     [ReturnsResult("GetPersonResult")]
     [result: Ok(Value<Person>), NotFound]
     public GetPersonResult GetPersonByName(string name)
     {
-        var person = name switch
-        {
-            "Max" => new Person("Max", 22),
-            "Rick" => new Person("Rick", 36),
-            "Susie" => new Person("Susie", 29),
-            _ => null,
-        };
+        if (people.TryGetValue(name, out var person))
+            return GetPersonResult.Ok(person);
 
-        return person is not null
-            ? GetPersonResult.Ok(person)
-            : GetPersonResult.NotFound();
+        return GetPersonResult.NotFound();
     }
 
     public record Person(string Name, int Age);
