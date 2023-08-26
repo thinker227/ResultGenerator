@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using ResultGenerator.Helpers;
 
@@ -56,10 +57,17 @@ internal readonly record struct ResultType(
 
     private static string GetResultTypeName(
         AttributeCtorArgs args,
-        IMethodSymbol method) => args switch
+        IMethodSymbol method)
     {
-        AttributeCtorArgs.Empty => method.Name + "Result",
-        AttributeCtorArgs.WithTypeName x => x.TypeName,
-        _ => throw new InvalidOperationException(),
-    };
+        var name = args switch
+        {
+            AttributeCtorArgs.Empty => method.Name + "Result",
+            AttributeCtorArgs.WithTypeName x => x.TypeName,
+            _ => throw new InvalidOperationException(),
+        };
+
+        return SyntaxFacts.GetKeywordKind(name) == SyntaxKind.None
+            ? name
+            : $"@{name}";
+    }
 }
