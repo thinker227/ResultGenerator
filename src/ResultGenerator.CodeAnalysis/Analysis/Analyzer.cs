@@ -19,7 +19,8 @@ public sealed class Analyzer : DiagnosticAnalyzer
         Diagnostics.CanBeInlined,
         Diagnostics.BadValueSyntax,
         Diagnostics.BadValueParamaterSyntax,
-        Diagnostics.TooManyValueParameterTypes);
+        Diagnostics.TooManyValueParameterTypes,
+        Diagnostics.UnknownType);
 
     public override void Initialize(AnalysisContext ctx)
     {
@@ -214,6 +215,32 @@ public sealed class Analyzer : DiagnosticAnalyzer
                 Diagnostic.Create(
                     Diagnostics.TooManyValueParameterTypes,
                     location));
+        });
+
+        foreach (var type in parameterTypes)
+        {
+            AnalyzeParameterType(ctx, type);
+        }
+    }
+
+    private static void AnalyzeParameterType(
+        SymbolStartAnalysisContext ctx,
+        TypeSyntax type)
+    {
+        // TODO: Fix this
+        var semanticModel = ctx.Compilation.GetSemanticModel(type.SyntaxTree);
+
+        ctx.RegisterSymbolEndAction(symbolEndCtx =>
+        {
+            if (ParameterType.GetTypeSymbolInfo(type, semanticModel) is not null) return;
+
+            var location = type.GetLocation();
+
+            symbolEndCtx.ReportDiagnostic(
+                Diagnostic.Create(
+                    Diagnostics.UnknownType,
+                    location,
+                    type.GetText().ToString()));
         });
     }
 }

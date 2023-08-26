@@ -11,6 +11,7 @@ internal readonly record struct ParameterType(
         TypeSyntax syntax,
         SemanticModel semanticModel)
     {
+        // Covered by diagnostic UnknownType.
         if (GetTypeSymbolInfo(syntax, semanticModel) is not INamedTypeSymbol symbol) return null;
 
         // If the type is nullable (i.e. a ? should be appended to it)

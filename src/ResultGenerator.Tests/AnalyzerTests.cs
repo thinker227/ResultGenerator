@@ -117,4 +117,14 @@ public class AnalyzerTests
         public void Foo() {}
     } 
     """);
+
+    [Fact]
+    public Task Reports_UnknownType() => VerifyCS.VerifyAnalyzerAsync(Header + """
+    public sealed class Class
+    {
+        [ReturnsResult]
+        [result: A(X<{|RESGEN0009:Foo|}>), B]
+        public void Foo() {}
+    } 
+    """);
 }

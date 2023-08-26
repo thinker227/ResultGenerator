@@ -69,4 +69,12 @@ public static class Diagnostics
         "ResultCorrectness",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true);
+
+    public static DiagnosticDescriptor UnknownType { get; } = new(
+        "RESGEN0009",
+        "Unknown type",
+        "Unknown type '{0}'",
+        "ResultCorrectness",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
 }
