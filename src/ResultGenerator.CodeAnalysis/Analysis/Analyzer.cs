@@ -24,11 +24,11 @@ public sealed class Analyzer : DiagnosticAnalyzer
 
             compilationCtx.RegisterSymbolStartAction(symbolStartCtx =>
             {
-                var symbol = (IMethodSymbol)symbolStartCtx.Symbol;
+                var method = (IMethodSymbol)symbolStartCtx.Symbol;
 
-                if (symbol.DeclaringSyntaxReferences[0]!.GetSyntax() is not MethodDeclarationSyntax symbolSyntax) return;
+                if (method.DeclaringSyntaxReferences[0]!.GetSyntax() is not MethodDeclarationSyntax methodSyntax) return;
 
-                var attribute = symbol.GetAttributes().FirstOrDefault(attr =>
+                var attribute = method.GetAttributes().FirstOrDefault(attr =>
                     attr.AttributeClass?.Equals(
                         typeProvider.ReturnsResultAttribute,
                         SymbolEqualityComparer.Default)
@@ -39,37 +39,55 @@ public sealed class Analyzer : DiagnosticAnalyzer
                 var attributeSyntax = (AttributeSyntax)attribute.ApplicationSyntaxReference!
                     .GetSyntax();
                 
-                var resultDeclarations = symbol.DeclaringSyntaxReferences
+                var resultDeclarations = method.DeclaringSyntaxReferences
                     .Select(r => r.GetSyntax())
                     .OfType<MethodDeclarationSyntax>()
                     .SelectMany(node => node.AttributeLists)
                     .Where(attribute => attribute.Target?.Identifier.Text == "result")
                     .ToImmutableArray();
 
-                symbolStartCtx.RegisterSymbolEndAction(symbolEndCtx =>
-                {
-                    if (resultDeclarations.Length == 0)
-                    {
-                        symbolEndCtx.ReportDiagnostic(
-                            Diagnostic.Create(
-                                Diagnostics.SpecifyResultDeclaration,
-                                symbolSyntax.Identifier.GetLocation()));
-                    }
-
-                    if (resultDeclarations.Length > 1)
-                    {
-                        foreach (var decl in resultDeclarations.Skip(1))
-                        {
-                            symbolEndCtx.ReportDiagnostic(
-                                Diagnostic.Create(
-                                    Diagnostics.TooManyResultDeclarations,
-                                    decl.GetLocation()));
-                        }
-                    }
-                });
-
-
+                AnalyzeResultDeclarations(symbolStartCtx, resultDeclarations, methodSyntax);
             }, SymbolKind.Method);
         });
+    }
+
+    private static void AnalyzeResultDeclarations(
+        SymbolStartAnalysisContext ctx,
+        ImmutableArray<AttributeListSyntax> resultDeclarations,
+        MethodDeclarationSyntax methodSyntax)
+    {
+        ctx.RegisterSymbolEndAction(symbolEndCtx =>
+        {
+            if (resultDeclarations.Length == 0)
+            {
+                symbolEndCtx.ReportDiagnostic(
+                    Diagnostic.Create(
+                        Diagnostics.SpecifyResultDeclaration,
+                        methodSyntax.Identifier.GetLocation()));
+            }
+
+            if (resultDeclarations.Length > 1)
+            {
+                foreach (var decl in resultDeclarations.Skip(1))
+                {
+                    symbolEndCtx.ReportDiagnostic(
+                        Diagnostic.Create(
+                            Diagnostics.TooManyResultDeclarations,
+                            decl.GetLocation()));
+                }
+            }
+        });
+
+        foreach (var decl in resultDeclarations)
+        {
+            AnalyzeResultDeclaration(ctx, decl);
+        }
+    }
+
+    private static void AnalyzeResultDeclaration(
+        SymbolStartAnalysisContext ctx,
+        AttributeListSyntax declaration)
+    {
+        
     }
 }
