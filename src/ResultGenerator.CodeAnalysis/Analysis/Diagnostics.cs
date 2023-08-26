@@ -37,4 +37,12 @@ public static class Diagnostics
         "ResultCorrectness",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true);
+
+    public static DiagnosticDescriptor CanBeInlined { get; } = new(
+        "RESGEN0005",
+        "Result type can be inlined",
+        "Result type with only one variant can be removed and inlined into the return type of the method",
+        "ResultQuality",
+        DiagnosticSeverity.Info,
+        isEnabledByDefault: true);
 }

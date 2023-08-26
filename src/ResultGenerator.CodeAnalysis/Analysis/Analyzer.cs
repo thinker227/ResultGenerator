@@ -14,7 +14,8 @@ public sealed class Analyzer : DiagnosticAnalyzer
         Diagnostics.SpecifyResultDeclaration,
         Diagnostics.TooManyResultDeclarations,
         Diagnostics.InvalidResultTypeName,
-        Diagnostics.InvalidAttributeCtor);
+        Diagnostics.InvalidAttributeCtor,
+        Diagnostics.CanBeInlined);
 
     public override void Initialize(AnalysisContext ctx)
     {
@@ -130,6 +131,17 @@ public sealed class Analyzer : DiagnosticAnalyzer
         SymbolStartAnalysisContext ctx,
         AttributeListSyntax declaration)
     {
-        
+        ctx.RegisterSymbolEndAction(symbolEndCtx =>
+        {
+            if (declaration.Attributes.Count == 1)
+            {
+                var location = declaration.Attributes[0].GetLocation();
+
+                symbolEndCtx.ReportDiagnostic(
+                    Diagnostic.Create(
+                        Diagnostics.CanBeInlined,
+                        location));
+            }
+        });
     }
 }

@@ -57,4 +57,14 @@ public class AnalyzerTests
         public void Foo() {}
     }
     """);
+
+    [Fact]
+    public Task Reports_CanBeInlined() => VerifyCS.VerifyAnalyzerAsync(Header + """
+    public sealed class Class
+    {
+        [ReturnsResult]
+        [result: {|RESGEN0005:A|}]
+        public void Foo() {}
+    }
+    """);
 }
