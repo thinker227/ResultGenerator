@@ -3,7 +3,7 @@ using VerifyCS = ResultGenerator.Tests.Verifiers.CSharpIncrementalGeneratorVerif
 
 namespace ResultGenerator.Tests;
 
-public class Tests
+public class GeneratorTests
 {
     private const string Header = """
     using System;
