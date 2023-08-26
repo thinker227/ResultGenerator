@@ -152,11 +152,6 @@ internal sealed class TextWriter
 
         builder.Append($"public bool TryAs{value.Name}(");
 
-        // foreach (var parameter in value.Parameters)
-        // {
-            
-        // }
-
         builder.Sections(", ", value.Parameters, parameter =>
         {
             var typeText = GetTypeString(parameter.Type);
@@ -170,16 +165,10 @@ internal sealed class TextWriter
         """);
         builder.Indent();
 
-        if (value.Parameters is [var parameter])
-        {
-            builder.Append(GetParameterName(parameter.Name));
-
-            var parameterName = GetParameterName(parameter.Name);
-        }
-        else
-        {
-            builder.Append($"({GetParameterNameListText(value.Parameters)})");
-        }
+        var variableTarget = value.Parameters is [var parameter]
+            ? GetParameterName(parameter.Name)
+            : $"{GetParameterNameListText(value.Parameters)}";
+        builder.Append(variableTarget);
         
         var fieldName = GetFieldName(value.Name);
         builder.AppendLine($"""
