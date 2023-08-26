@@ -20,6 +20,8 @@ internal readonly record struct ResultType(
 
         var name = GetResultTypeName(args, symbol);
 
+        if (!SyntaxUtility.IsValidIdentifier(name)) return null;
+
         var resultAttributeLists = node.AttributeLists
             .Where(attribute => attribute.Target?.Identifier.Text == "result")
             .ToImmutableArray();
