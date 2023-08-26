@@ -15,7 +15,8 @@ public sealed class Analyzer : DiagnosticAnalyzer
         Diagnostics.TooManyResultDeclarations,
         Diagnostics.InvalidResultTypeName,
         Diagnostics.InvalidAttributeCtor,
-        Diagnostics.CanBeInlined);
+        Diagnostics.CanBeInlined,
+        Diagnostics.BadValueSyntax);
 
     public override void Initialize(AnalysisContext ctx)
     {
@@ -142,6 +143,28 @@ public sealed class Analyzer : DiagnosticAnalyzer
                         Diagnostics.CanBeInlined,
                         location));
             }
+        });
+
+        foreach (var value in declaration.Attributes)
+        {
+            AnalyzeResultValue(ctx, value);
+        }
+    }
+
+    private static void AnalyzeResultValue(
+        SymbolStartAnalysisContext ctx,
+        AttributeSyntax value)
+    {
+        ctx.RegisterSymbolEndAction(symbolEndCtx =>
+        {
+            if (value.Name is IdentifierNameSyntax) return;
+
+            var location = value.Name.GetLocation();
+
+            symbolEndCtx.ReportDiagnostic(
+                Diagnostic.Create(
+                    Diagnostics.BadValueSyntax,
+                    location));
         });
     }
 }

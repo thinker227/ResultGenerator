@@ -45,4 +45,12 @@ public static class Diagnostics
         "ResultQuality",
         DiagnosticSeverity.Info,
         isEnabledByDefault: true);
+
+    public static DiagnosticDescriptor BadValueSyntax { get; } = new(
+        "RESGEN0006",
+        "Invalid result value identifier",
+        "Result value name has to be a single identifier",
+        "ResultCorrectness",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
 }

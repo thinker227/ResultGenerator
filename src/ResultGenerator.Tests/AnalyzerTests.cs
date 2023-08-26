@@ -67,4 +67,24 @@ public class AnalyzerTests
         public void Foo() {}
     }
     """);
+
+    [Fact]
+    public Task Reports_BadValueSyntax_ForSimpleValues() => VerifyCS.VerifyAnalyzerAsync(Header + """
+    public sealed class Class
+    {
+        [ReturnsResult]
+        [result: {|RESGEN0006:X.Y|}, Z]
+        public void Foo() {}
+    }
+    """);
+
+    [Fact]
+    public Task Reports_BadValueSyntax_ForValuesWithParameters() => VerifyCS.VerifyAnalyzerAsync(Header + """
+    public sealed class Class
+    {
+        [ReturnsResult]
+        [result: {|RESGEN0006:X.Y|}(Str<string>), Z]
+        public void Foo() {}
+    }
+    """);
 }

@@ -14,6 +14,7 @@ internal readonly record struct ResultValue(
         SemanticModel semanticModel)
     {
         // Names other than simple names are not supported.
+        // Covered by diagnostic BadValueSyntax.
         if (syntax.Name is not IdentifierNameSyntax
         {
             Identifier.Text: var name
