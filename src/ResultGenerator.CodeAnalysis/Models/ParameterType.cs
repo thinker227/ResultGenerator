@@ -11,14 +11,7 @@ internal readonly record struct ParameterType(
         TypeSyntax syntax,
         SemanticModel semanticModel)
     {
-        var position = syntax.GetLocation().SourceSpan.Start;
-        // This is probably bad.
-        var symbolInfo = semanticModel.GetSpeculativeSymbolInfo(
-            position,
-            syntax,
-            SpeculativeBindingOption.BindAsTypeOrNamespace);
-
-        if (symbolInfo.Symbol is not INamedTypeSymbol symbol) return null;
+        if (GetTypeSymbolInfo(syntax, semanticModel) is not INamedTypeSymbol symbol) return null;
 
         // If the type is nullable (i.e. a ? should be appended to it)
         // then the type syntax has to be a NullableTypeSyntax
@@ -31,5 +24,19 @@ internal readonly record struct ParameterType(
         return new(
             symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
             isNullable);
+    }
+
+    public static INamedTypeSymbol? GetTypeSymbolInfo(
+        TypeSyntax syntax,
+        SemanticModel semanticModel)
+    {
+        var position = syntax.GetLocation().SourceSpan.Start;
+        // This is probably bad.
+        var symbolInfo = semanticModel.GetSpeculativeSymbolInfo(
+            position,
+            syntax,
+            SpeculativeBindingOption.BindAsTypeOrNamespace);
+
+        return symbolInfo.Symbol as INamedTypeSymbol;
     }
 }
