@@ -16,7 +16,8 @@ public sealed class Analyzer : DiagnosticAnalyzer
         Diagnostics.InvalidResultTypeName,
         Diagnostics.InvalidAttributeCtor,
         Diagnostics.CanBeInlined,
-        Diagnostics.BadValueSyntax);
+        Diagnostics.BadValueSyntax,
+        Diagnostics.BadValueParamaterSyntax);
 
     public override void Initialize(AnalysisContext ctx)
     {
@@ -164,6 +165,31 @@ public sealed class Analyzer : DiagnosticAnalyzer
             symbolEndCtx.ReportDiagnostic(
                 Diagnostic.Create(
                     Diagnostics.BadValueSyntax,
+                    location));
+        });
+
+        var parameters = value.ArgumentList?.Arguments
+            .ToImmutableArray()
+            ?? ImmutableArray<AttributeArgumentSyntax>.Empty;
+        foreach (var parameter in parameters)
+        {
+            AnalyzeValueParameter(ctx, parameter);
+        }
+    }
+
+    private static void AnalyzeValueParameter(
+        SymbolStartAnalysisContext ctx,
+        AttributeArgumentSyntax parameter)
+    {
+        ctx.RegisterSymbolEndAction(symbolEndCtx =>
+        {
+            if (parameter.Expression is GenericNameSyntax) return;
+
+            var location = parameter.Expression.GetLocation();
+
+            symbolEndCtx.ReportDiagnostic(
+                Diagnostic.Create(
+                    Diagnostics.BadValueParamaterSyntax,
                     location));
         });
     }

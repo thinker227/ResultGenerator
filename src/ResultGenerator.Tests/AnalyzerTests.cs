@@ -87,4 +87,14 @@ public class AnalyzerTests
         public void Foo() {}
     }
     """);
+
+    [Fact]
+    public Task Reports_BadValueParamaterSyntax() => VerifyCS.VerifyAnalyzerAsync(Header + """
+    public sealed class Class
+    {
+        [ReturnsResult]
+        [result: A({|RESGEN0007:X.Y|}), B]
+        public void Foo() {}
+    }
+    """);
 }

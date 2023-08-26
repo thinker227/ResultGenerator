@@ -11,6 +11,7 @@ internal readonly record struct ValueParameter(
         AttributeArgumentSyntax argument,
         SemanticModel semanticModel)
     {
+        // Covered by diagnostic BadValueParamaterSyntax.
         if (argument.Expression is not GenericNameSyntax
         {
             Identifier.Text: var name,

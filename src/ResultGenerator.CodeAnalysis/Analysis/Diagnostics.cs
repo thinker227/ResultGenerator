@@ -53,4 +53,12 @@ public static class Diagnostics
         "ResultCorrectness",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true);
+
+    public static DiagnosticDescriptor BadValueParamaterSyntax { get; } = new(
+        "RESGEN0007",
+        "Invalid value parameter syntax",
+        "Value parameter has to be an identifier followed by angle brackets and a type",
+        "ResultCorrectness",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
 }
