@@ -43,7 +43,7 @@ internal sealed class TextWriter
 
         #nullable enable
         
-        public readonly struct {type.Name}
+        public readonly struct @{type.Name}
         """);
         
         using (builder.IndentedBlock("{", "}", true))
@@ -84,7 +84,7 @@ internal sealed class TextWriter
 
     private void WriteCtor()
     {
-        builder.Append($"private {type.Name}(int flag");
+        builder.Append($"private @{type.Name}(int flag");
 
         foreach (var value in type.Values)
         {
@@ -118,7 +118,7 @@ internal sealed class TextWriter
     {
         var index = valueIndicies[value];
         
-        builder.Append($"public static {type.Name} {value.Name}");
+        builder.Append($"public static @{type.Name} {value.Name}");
         
         if (value.Parameters.IsEmpty)
         {

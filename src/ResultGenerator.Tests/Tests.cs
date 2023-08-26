@@ -43,20 +43,20 @@ public class Tests
 
         #nullable enable
 
-        public readonly struct GetPersonResult
+        public readonly struct @GetPersonResult
         {
             private readonly int _flag;
             
             // Variant Ok has no data.
             // Variant NotFound has no data.
             
-            private GetPersonResult(int flag)
+            private @GetPersonResult(int flag)
             {
                 this._flag = flag;
             }
 
-            public static GetPersonResult Ok() => new(1);
-            public static GetPersonResult NotFound() => new(2);
+            public static @GetPersonResult Ok() => new(1);
+            public static @GetPersonResult NotFound() => new(2);
             
             public bool IsOk => this._flag == 1;
             public bool IsNotFound => this._flag == 2;
@@ -92,20 +92,20 @@ public class Tests
 
         #nullable enable
 
-        public readonly struct GetPersonRes
+        public readonly struct @GetPersonRes
         {
             private readonly int _flag;
             
             // Variant Ok has no data.
             // Variant NotFound has no data.
             
-            private GetPersonRes(int flag)
+            private @GetPersonRes(int flag)
             {
                 this._flag = flag;
             }
 
-            public static GetPersonRes Ok() => new(1);
-            public static GetPersonRes NotFound() => new(2);
+            public static @GetPersonRes Ok() => new(1);
+            public static @GetPersonRes NotFound() => new(2);
             
             public bool IsOk => this._flag == 1;
             public bool IsNotFound => this._flag == 2;
@@ -141,21 +141,21 @@ public class Tests
 
         #nullable enable
 
-        public readonly struct FooResult
+        public readonly struct @FooResult
         {
             private readonly int _flag;
             
             private readonly string _aData;
             // Variant B has no data.
             
-            private FooResult(int flag, string a = default!)
+            private @FooResult(int flag, string a = default!)
             {
                 this._flag = flag;
                 this._aData = a;
             }
 
-            public static FooResult A(string str) => new(1, a: (str));
-            public static FooResult B() => new(2);
+            public static @FooResult A(string str) => new(1, a: (str));
+            public static @FooResult B() => new(2);
             
             public bool IsA => this._flag == 1;
             public bool IsB => this._flag == 2;
@@ -195,21 +195,21 @@ public class Tests
 
         #nullable enable
 
-        public readonly struct FooResult
+        public readonly struct @FooResult
         {
             private readonly int _flag;
             
             private readonly (string, int, bool) _aData;
             // Variant B has no data.
             
-            private FooResult(int flag, (string, int, bool) a = default!)
+            private @FooResult(int flag, (string, int, bool) a = default!)
             {
                 this._flag = flag;
                 this._aData = a;
             }
 
-            public static FooResult A(string str, int x, bool b) => new(1, a: (str, x, b));
-            public static FooResult B() => new(2);
+            public static @FooResult A(string str, int x, bool b) => new(1, a: (str, x, b));
+            public static @FooResult B() => new(2);
             
             public bool IsA => this._flag == 1;
             public bool IsB => this._flag == 2;
@@ -256,13 +256,13 @@ public class Tests
             // Variant A has no data.
             // Variant B has no data.
             
-            private FooResult(int flag)
+            private @class(int flag)
             {
                 this._flag = flag;
             }
 
-            public static FooResult A() => new(1);
-            public static FooResult B() => new(2);
+            public static @class A() => new(1);
+            public static @class B() => new(2);
             
             public bool IsA => this._flag == 1;
             public bool IsB => this._flag == 2;
@@ -275,6 +275,6 @@ public class Tests
         
         await VerifyCS.VerifyGeneratorAsync(
             code,
-            ("@class.g.cs", expected));
+            ("class.g.cs", expected));
     }
 }
