@@ -43,18 +43,6 @@ internal readonly record struct ResultType(
             values);
     }
 
-    private static AttributeCtorArgs? GetAttributeCtorArgs(AttributeData attribute) => attribute.ConstructorArguments switch
-    {
-        [] => new AttributeCtorArgs.Empty(),
-
-        [{
-            Kind: TypedConstantKind.Primitive,
-            Value: string typeName,
-        }] => new AttributeCtorArgs.WithTypeName(typeName),
-        
-        _ => null
-    };
-
     private static string GetResultTypeName(
         AttributeCtorArgs args,
         IMethodSymbol method)
