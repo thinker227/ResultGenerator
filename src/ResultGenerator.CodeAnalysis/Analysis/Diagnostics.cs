@@ -29,4 +29,12 @@ public static class Diagnostics
         DiagnosticSeverity.Error,
         isEnabledByDefault: true,
         description: "Result type names have to be valid C# identifiers");
+
+    public static DiagnosticDescriptor InvalidAttributeCtor { get; } = new(
+        "RESGEN0004",
+        "Unrecognized attribute constructor",
+        "Attribute constructor should take either no parameters or one string parameter",
+        "ResultCorrectness",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
 }

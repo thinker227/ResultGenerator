@@ -1,9 +1,9 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using ResultGenerator.Helpers;
+using ResultGenerator.Models;
 
 namespace ResultGenerator.Analysis;
 
@@ -13,7 +13,8 @@ public sealed class Analyzer : DiagnosticAnalyzer
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = ImmutableArray.Create(
         Diagnostics.SpecifyResultDeclaration,
         Diagnostics.TooManyResultDeclarations,
-        Diagnostics.InvalidResultTypeName);
+        Diagnostics.InvalidResultTypeName,
+        Diagnostics.InvalidAttributeCtor);
 
     public override void Initialize(AnalysisContext ctx)
     {
@@ -60,16 +61,28 @@ public sealed class Analyzer : DiagnosticAnalyzer
         SymbolStartAnalysisContext ctx,
         AttributeData attribute)
     {
-        if (attribute.ConstructorArguments is not [{
-            Kind: TypedConstantKind.Primitive,
-            Value: string typeName,
-        }]) return;
+        var syntax = (AttributeSyntax)attribute.ApplicationSyntaxReference!.GetSyntax();
+
+        var ctorArgs = AttributeCtorArgs.Create(attribute);
+
+        ctx.RegisterSymbolEndAction(symbolEndCtx =>
+        {
+            if (ctorArgs is not null) return;
+
+            var location = syntax.ArgumentList!.GetLocation();
+
+            symbolEndCtx.ReportDiagnostic(
+                Diagnostic.Create(
+                    Diagnostics.InvalidAttributeCtor,
+                    location));
+        });
+
+        if (ctorArgs is not AttributeCtorArgs.WithTypeName { TypeName: var typeName }) return;
 
         ctx.RegisterSymbolEndAction(symbolEndCtx =>
         {
             if (SyntaxUtility.IsValidIdentifier(typeName)) return;
 
-            var syntax = (AttributeSyntax)attribute.ApplicationSyntaxReference!.GetSyntax();
             var location = syntax.ArgumentList!.Arguments[0].Expression.GetLocation();
 
             symbolEndCtx.ReportDiagnostic(

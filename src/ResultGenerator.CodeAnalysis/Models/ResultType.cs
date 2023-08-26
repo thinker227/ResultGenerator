@@ -12,16 +12,17 @@ internal readonly record struct ResultType(
     public static ResultType? Create(
         GeneratorAttributeSyntaxContext ctx)
     {
-        // Covered by SpecifyResultDeclaration and TooManyResultDeclarations diagnostics.
+        // Covered by diagnostic SpecifyResultDeclaration.
         if (ctx.Attributes is not [var attribute]) return null;
         var node = (MethodDeclarationSyntax)ctx.TargetNode;
         var symbol = (IMethodSymbol)ctx.TargetSymbol;
 
+        // Covered by diagnostic InvalidAttributeCtor.
         if (AttributeCtorArgs.Create(attribute) is not AttributeCtorArgs args) return null;
 
         var name = GetResultTypeName(args, symbol);
 
-        // Covered by InvalidResultTypeName diagnostic.
+        // Covered by diagnostic InvalidResultTypeName.
         if (!SyntaxUtility.IsValidIdentifier(name)) return null;
 
         var resultAttributeLists = node.AttributeLists
@@ -29,6 +30,7 @@ internal readonly record struct ResultType(
             .ToImmutableArray();
 
         // Only one result specifier is allowed per method.
+        // Covered by diagnostic TooManyResultDeclarations.
         if (resultAttributeLists is not [var resultAttributeList]) return null;
 
         var values = resultAttributeList.Attributes
