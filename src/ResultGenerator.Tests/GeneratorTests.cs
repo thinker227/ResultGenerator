@@ -5,24 +5,6 @@ namespace ResultGenerator.Tests;
 
 public class GeneratorTests
 {
-    private const string Header = """
-    using System;
-    using ResultGenerator;
-
-    namespace ResultGenerator
-    {
-        [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
-        public sealed class ReturnsResultAttribute : Attribute
-        {
-            public ReturnsResultAttribute() {}
-            
-            public ReturnsResultAttribute(string typeName) {}
-        }
-    }
-
-
-    """;
-
     [Fact]
     public async Task GeneratesResultFromInferredName()
     {
