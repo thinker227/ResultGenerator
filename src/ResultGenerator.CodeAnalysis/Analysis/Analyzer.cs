@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using ResultGenerator.Helpers;
 using ResultGenerator.Models;
+using Microsoft.CodeAnalysis.Text;
 
 namespace ResultGenerator.Analysis;
 
@@ -17,7 +18,8 @@ public sealed class Analyzer : DiagnosticAnalyzer
         Diagnostics.InvalidAttributeCtor,
         Diagnostics.CanBeInlined,
         Diagnostics.BadValueSyntax,
-        Diagnostics.BadValueParamaterSyntax);
+        Diagnostics.BadValueParamaterSyntax,
+        Diagnostics.TooManyValueParameterTypes);
 
     public override void Initialize(AnalysisContext ctx)
     {
@@ -183,13 +185,34 @@ public sealed class Analyzer : DiagnosticAnalyzer
     {
         ctx.RegisterSymbolEndAction(symbolEndCtx =>
         {
-            if (parameter.Expression is GenericNameSyntax) return;
+            if (parameter.Expression is not GenericNameSyntax)
+            {
+                var location = parameter.Expression.GetLocation();
 
-            var location = parameter.Expression.GetLocation();
+                symbolEndCtx.ReportDiagnostic(
+                    Diagnostic.Create(
+                        Diagnostics.BadValueParamaterSyntax,
+                        location));
+            }
+        });
+
+        if (parameter.Expression is not GenericNameSyntax genericNameSyntax) return;
+
+        var parameterTypes = genericNameSyntax.TypeArgumentList.Arguments;
+
+        ctx.RegisterSymbolEndAction(symbolEndCtx =>
+        {
+            if (parameterTypes.Count <= 1) return;
+
+            var start = parameterTypes[1].Span.Start;
+            var end = parameterTypes[^1].Span.End;
+            var location = Location.Create(
+                parameter.SyntaxTree,
+                TextSpan.FromBounds(start, end));
 
             symbolEndCtx.ReportDiagnostic(
                 Diagnostic.Create(
-                    Diagnostics.BadValueParamaterSyntax,
+                    Diagnostics.TooManyValueParameterTypes,
                     location));
         });
     }

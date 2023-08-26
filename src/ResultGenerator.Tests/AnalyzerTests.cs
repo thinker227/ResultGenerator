@@ -97,4 +97,24 @@ public class AnalyzerTests
         public void Foo() {}
     }
     """);
+
+    [Fact]
+    public Task Reports_TooManyValueParameterTypes_ForTwoTypes() => VerifyCS.VerifyAnalyzerAsync(Header + """
+    public sealed class Class
+    {
+        [ReturnsResult]
+        [result: A(X<int, {|RESGEN0008:string|}>), B]
+        public void Foo() {}
+    } 
+    """);
+
+    [Fact]
+    public Task Reports_TooManyValueParameterTypes_ForManyTypes() => VerifyCS.VerifyAnalyzerAsync(Header + """
+    public sealed class Class
+    {
+        [ReturnsResult]
+        [result: A(X<int, {|RESGEN0008:string, double, bool|}>), B]
+        public void Foo() {}
+    } 
+    """);
 }

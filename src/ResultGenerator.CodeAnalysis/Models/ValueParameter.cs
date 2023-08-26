@@ -15,6 +15,7 @@ internal readonly record struct ValueParameter(
         if (argument.Expression is not GenericNameSyntax
         {
             Identifier.Text: var name,
+            // Covered by diagnostic TooManyValueParameterTypes.
             TypeArgumentList.Arguments: [var typeSyntax]
         })
             return null;

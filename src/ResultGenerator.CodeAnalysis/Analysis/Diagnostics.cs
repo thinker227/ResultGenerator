@@ -61,4 +61,12 @@ public static class Diagnostics
         "ResultCorrectness",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true);
+
+    public static DiagnosticDescriptor TooManyValueParameterTypes { get; } = new(
+        "RESGEN0008",
+        "Too many value parameter types",
+        "Value parameters can only specify a single type",
+        "ResultCorrectness",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
 }
