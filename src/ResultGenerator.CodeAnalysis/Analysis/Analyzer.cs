@@ -1,7 +1,9 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using ResultGenerator.Helpers;
 
 namespace ResultGenerator.Analysis;
 
@@ -10,7 +12,8 @@ public sealed class Analyzer : DiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = ImmutableArray.Create(
         Diagnostics.SpecifyResultDeclaration,
-        Diagnostics.TooManyResultDeclarations);
+        Diagnostics.TooManyResultDeclarations,
+        Diagnostics.InvalidResultTypeName);
 
     public override void Initialize(AnalysisContext ctx)
     {
@@ -36,6 +39,8 @@ public sealed class Analyzer : DiagnosticAnalyzer
 
                 if (attribute is null) return;
 
+                AnalyzeAttribute(symbolStartCtx, attribute);
+
                 var attributeSyntax = (AttributeSyntax)attribute.ApplicationSyntaxReference!
                     .GetSyntax();
                 
@@ -48,6 +53,30 @@ public sealed class Analyzer : DiagnosticAnalyzer
 
                 AnalyzeResultDeclarations(symbolStartCtx, resultDeclarations, methodSyntax);
             }, SymbolKind.Method);
+        });
+    }
+
+    private static void AnalyzeAttribute(
+        SymbolStartAnalysisContext ctx,
+        AttributeData attribute)
+    {
+        if (attribute.ConstructorArguments is not [{
+            Kind: TypedConstantKind.Primitive,
+            Value: string typeName,
+        }]) return;
+
+        ctx.RegisterSymbolEndAction(symbolEndCtx =>
+        {
+            if (SyntaxUtility.IsValidIdentifier(typeName)) return;
+
+            var syntax = (AttributeSyntax)attribute.ApplicationSyntaxReference!.GetSyntax();
+            var location = syntax.ArgumentList!.Arguments[0].Expression.GetLocation();
+
+            symbolEndCtx.ReportDiagnostic(
+                Diagnostic.Create(
+                    Diagnostics.InvalidResultTypeName,
+                    location,
+                    typeName));
         });
     }
 

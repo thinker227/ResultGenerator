@@ -20,4 +20,12 @@ public static class Diagnostics
         "ResultCorrectness",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true);
+
+    public static DiagnosticDescriptor InvalidResultTypeName { get; } = new(
+        "RESGEN0003",
+        "Invalid result type name",
+        "'{0}' is not a valid result type name",
+        "ResultCorrectness",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
 }
