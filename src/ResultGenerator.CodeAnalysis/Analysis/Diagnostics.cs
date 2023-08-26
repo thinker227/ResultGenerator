@@ -27,5 +27,6 @@ public static class Diagnostics
         "'{0}' is not a valid result type name",
         "ResultCorrectness",
         DiagnosticSeverity.Error,
-        isEnabledByDefault: true);
+        isEnabledByDefault: true,
+        description: "Result type names have to be valid C# identifiers");
 }
