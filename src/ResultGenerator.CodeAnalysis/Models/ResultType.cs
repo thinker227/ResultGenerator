@@ -13,14 +13,16 @@ internal readonly record struct ResultType(
     public static ResultType? Create(
         GeneratorAttributeSyntaxContext ctx)
     {
+        // Covered by SpecifyResultDeclaration and TooManyResultDeclarations diagnostics.
         if (ctx.Attributes is not [var attribute]) return null;
         var node = (MethodDeclarationSyntax)ctx.TargetNode;
         var symbol = (IMethodSymbol)ctx.TargetSymbol;
 
-        if (GetAttributeCtorArgs(attribute) is not AttributeCtorArgs args) return null;
+        if (AttributeCtorArgs.Create(attribute) is not AttributeCtorArgs args) return null;
 
         var name = GetResultTypeName(args, symbol);
 
+        // Covered by InvalidResultTypeName diagnostic.
         if (!SyntaxUtility.IsValidIdentifier(name)) return null;
 
         var resultAttributeLists = node.AttributeLists
