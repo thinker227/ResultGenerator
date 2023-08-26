@@ -167,7 +167,7 @@ internal sealed class TextWriter
 
         var variableTarget = value.Parameters is [var parameter]
             ? GetParameterName(parameter.Name)
-            : $"{GetParameterNameListText(value.Parameters)}";
+            : $"({GetParameterNameListText(value.Parameters)})";
         builder.Append(variableTarget);
         
         var fieldName = GetFieldName(value.Name);
