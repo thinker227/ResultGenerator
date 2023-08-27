@@ -25,8 +25,8 @@ internal readonly record struct ResultType(
         // Covered by diagnostic InvalidResultTypeName.
         if (!SyntaxUtility.IsValidIdentifier(name)) return null;
 
-        var resultAttributeLists = node.AttributeLists
-            .Where(attribute => attribute.Target?.Identifier.Text == "result")
+        var resultAttributeLists = node
+            .GetResultDeclarations()
             .ToImmutableArray();
 
         // Only one result specifier is allowed per method.

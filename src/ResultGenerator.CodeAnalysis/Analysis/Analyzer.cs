@@ -67,7 +67,7 @@ public sealed class Analyzer : DiagnosticAnalyzer
                 }
 
                 // Get result decalration(s).
-                var resultDeclarations = method
+                var resultDeclarations = methodSyntax
                     .GetResultDeclarations()
                     .ToImmutableArray();
 
@@ -122,7 +122,10 @@ public sealed class Analyzer : DiagnosticAnalyzer
         }
         else return;
 
-        var resultDeclarations = otherPart.GetResultDeclarations();
+        var otherSyntax = (MethodDeclarationSyntax)
+            otherPart.DeclaringSyntaxReferences[0].GetSyntax();
+            
+        var resultDeclarations = otherSyntax.GetResultDeclarations();
 
         foreach (var declaration in resultDeclarations)
         {

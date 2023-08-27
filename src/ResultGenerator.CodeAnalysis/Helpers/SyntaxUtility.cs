@@ -14,12 +14,8 @@ public static class SyntaxUtility
     public static bool IsResultDeclaration(this AttributeListSyntax attribute) =>
         attribute.Target?.Identifier.Text == "result";
 
-    public static IEnumerable<AttributeListSyntax> GetResultDeclarations(this ISymbol symbol) =>
-        symbol.DeclaringSyntaxReferences
-            .Select(r => r.GetSyntax())
-            .OfType<MethodDeclarationSyntax>()
-            .SelectMany(node => node.AttributeLists)
-            .Where(IsResultDeclaration);
+    public static IEnumerable<AttributeListSyntax> GetResultDeclarations(this MethodDeclarationSyntax syntax) =>
+        syntax.AttributeLists .Where(IsResultDeclaration);
 
     public static TNode? GetAncestorNode<TNode>(this SyntaxNode node)
         where TNode : SyntaxNode
