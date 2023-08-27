@@ -12,8 +12,10 @@ internal readonly record struct ResultType(
     public static ResultType? Create(
         GeneratorAttributeSyntaxContext ctx)
     {
-        // Covered by diagnostic SpecifyResultDeclaration.
-        if (ctx.Attributes is not [var attribute]) return null;
+        // Only one attribute should be allowed per method.
+        // To improve error handling, if there are multiple attributes
+        // then the first one should be used.
+        if (ctx.Attributes is not [var attribute, ..]) return null;
         var node = (MethodDeclarationSyntax)ctx.TargetNode;
         var symbol = (IMethodSymbol)ctx.TargetSymbol;
 
@@ -29,9 +31,11 @@ internal readonly record struct ResultType(
             .GetResultDeclarations()
             .ToImmutableArray();
 
-        // Only one result specifier is allowed per method.
-        // Covered by diagnostic TooManyResultDeclarations.
-        if (resultAttributeLists is not [var resultAttributeList]) return null;
+        // Only one result declaration is allowed per method.
+        // To improve error handling, if there are multiple declarations
+        // then the first one should be used.
+        // Covered by diagnostics SpecifyResultDeclaration and TooManyResultDeclarations.
+        if (resultAttributeLists is not [var resultAttributeList, ..]) return null;
 
         var values = resultAttributeList.Attributes
             .Select(attribute => ResultValue.Create(
