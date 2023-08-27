@@ -44,8 +44,7 @@ public sealed class Analyzer : DiagnosticAnalyzer
                 // Get method syntax.
                 // Even if the method is partial, the declaring
                 // syntax references are never more than one.
-                var methodSyntax = (MethodDeclarationSyntax)
-                    method.DeclaringSyntaxReferences[0].GetSyntax();
+                if (method.DeclaringSyntaxReferences[0].GetSyntax() is not MethodDeclarationSyntax methodSyntax) return;
 
                 // Get attribute data.
                 var attribute = method
