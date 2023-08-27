@@ -3,8 +3,9 @@
 /// <summary>
 /// Specifies a method which returns a generated result type.
 /// <br/>
-/// Methods with this attribute should have an attribute list with the <c>result</c> target,
-/// the attribute names of which will specify the variants in the generated result type.
+/// Methods with this attribute should have a result declaration
+/// which specifies the variants of the result,
+/// specified as an attribute list with the <c>result:</c> target.
 /// <br/>
 /// Result variants may have parameters, specified as attribute arguments
 /// with a single type argument which specifies the parameter type.
@@ -35,6 +36,7 @@ public sealed class ReturnsResultAttribute : Attribute
     /// </summary>
     /// <param name="typeName">
     /// The name of the generated result type.
+    /// The specified name has to be a valid C# identifier.
     /// <br/>
     /// If not specified, the generated type name will be
     /// the name of the target method + <c>Result</c>.
