@@ -22,7 +22,8 @@ public sealed class Analyzer : DiagnosticAnalyzer
         Diagnostics.BadValueSyntax,
         Diagnostics.BadValueParamaterSyntax,
         Diagnostics.TooManyValueParameterTypes,
-        Diagnostics.UnknownType);
+        Diagnostics.UnknownType,
+        Diagnostics.IgnoredResultDeclaration);
 
     public override void Initialize(AnalysisContext ctx)
     {
@@ -40,6 +41,12 @@ public sealed class Analyzer : DiagnosticAnalyzer
                 // Only analyze ordinary method declarations.
                 if (method.MethodKind is not MethodKind.Ordinary) return;
 
+                // Get method syntax.
+                // Even if the method is partial, the declaring
+                // syntax references are never more than one.
+                var methodSyntax = (MethodDeclarationSyntax)
+                    method.DeclaringSyntaxReferences[0].GetSyntax();
+
                 // Get attribute data.
                 var attribute = method
                     .GetAttributeDataFor(typeProvider.ReturnsResultAttribute);
@@ -50,22 +57,25 @@ public sealed class Analyzer : DiagnosticAnalyzer
                 var attributeSyntax = (AttributeSyntax)
                     attribute.ApplicationSyntaxReference!.GetSyntax();
 
-                // Get method syntax.
-                // Since the attribute syntax is retrieved from the result attribute
-                // on the method, it should be impossible for the attribute syntax node
-                // to not have an ancestor which is the method declaration itself.
-                var methodSyntax = attributeSyntax.GetAncestorNode<MethodDeclarationSyntax>()!;
+                {
+                    var attributeMethodDeclaration = attributeSyntax
+                        .GetAncestorNode<MethodDeclarationSyntax>()!;
+
+                    // Check whether the method syntax the attribute was applied to is the
+                    // same as the method syntax which the method symbol represents.
+                    if (!methodSyntax.Equals(attributeMethodDeclaration)) return;
+                }
 
                 // Get result decalration(s).
-                var resultDeclarations = method.DeclaringSyntaxReferences
-                    .Select(r => r.GetSyntax())
-                    .OfType<MethodDeclarationSyntax>()
-                    .SelectMany(node => node.AttributeLists)
-                    .Where(SyntaxUtility.IsResultDeclaration)
+                var resultDeclarations = method
+                    .GetResultDeclarations()
                     .ToImmutableArray();
 
                 symbolStartCtx.RegisterSymbolEndAction(symbolEndCtx =>
                 {
+                    // Analyze method.
+                    AnalyzeMethod(symbolEndCtx.ReportDiagnostic, method);
+
                     // Analyze attribute.
                     AnalyzeAttribute(
                         symbolEndCtx.ReportDiagnostic,
@@ -77,8 +87,6 @@ public sealed class Analyzer : DiagnosticAnalyzer
                         symbolEndCtx.ReportDiagnostic,
                         resultDeclarations,
                         methodSyntax);
-
-                    
                 });
 
                 // Analyze result declarations.
@@ -96,6 +104,34 @@ public sealed class Analyzer : DiagnosticAnalyzer
                 }, SyntaxKind.AttributeList);
             }, SymbolKind.Method);
         });
+    }
+
+    private void AnalyzeMethod(Reporter report, IMethodSymbol method)
+    {
+        // Get the other part of the partial declaration if there is one.
+        IMethodSymbol otherPart;
+        if (method.PartialDefinitionPart is IMethodSymbol declarationPart &&
+            !declarationPart.Equals(method, SymbolEqualityComparer.Default))
+        {
+            otherPart = declarationPart;
+        }
+        else if (method.PartialImplementationPart is IMethodSymbol implementationPart &&
+            !implementationPart.Equals(method, SymbolEqualityComparer.Default))
+        {
+            otherPart = implementationPart;
+        }
+        else return;
+
+        var resultDeclarations = otherPart.GetResultDeclarations();
+
+        foreach (var declaration in resultDeclarations)
+        {
+            var location = declaration.GetLocation();
+
+            report(Diagnostic.Create(
+                Diagnostics.IgnoredResultDeclaration,
+                location));
+        }
     }
 
     private static void AnalyzeAttribute(

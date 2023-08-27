@@ -77,4 +77,12 @@ public static class Diagnostics
         "ResultCorrectness",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true);
+
+    public static DiagnosticDescriptor IgnoredResultDeclaration { get; } = new(
+        "RESGEN0010",
+        "Result declaration will be ignored",
+        "Result declarations on partial methods have to be on the part with the corresponding [ReturnsResult] attribute. This result declaration will be ignored",
+        "ResultCorrectness",
+        DiagnosticSeverity.Warning,
+        isEnabledByDefault: true);
 }
