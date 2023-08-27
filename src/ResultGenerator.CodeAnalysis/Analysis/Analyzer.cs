@@ -5,6 +5,8 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using ResultGenerator.Helpers;
 using ResultGenerator.Models;
 using Microsoft.CodeAnalysis.Text;
+using Reporter = System.Action<Microsoft.CodeAnalysis.Diagnostic>;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace ResultGenerator.Analysis;
 
@@ -35,212 +37,214 @@ public sealed class Analyzer : DiagnosticAnalyzer
             compilationCtx.RegisterSymbolStartAction(symbolStartCtx =>
             {
                 var method = (IMethodSymbol)symbolStartCtx.Symbol;
+                // Only analyze ordinary method declarations.
+                if (method.MethodKind is not MethodKind.Ordinary) return;
 
-                if (method.DeclaringSyntaxReferences[0]!.GetSyntax() is not MethodDeclarationSyntax methodSyntax) return;
-
-                var attribute = method.GetAttributes().FirstOrDefault(attr =>
-                    attr.AttributeClass?.Equals(
-                        typeProvider.ReturnsResultAttribute,
-                        SymbolEqualityComparer.Default)
-                        ?? false);
-
+                // Get attribute data.
+                var attribute = method
+                    .GetAttributeDataFor(typeProvider.ReturnsResultAttribute);
                 if (attribute is null) return;
 
-                AnalyzeAttribute(symbolStartCtx, attribute);
+                // Get attribute syntax.
+                // The application syntax reference *should* not be null.
+                var attributeSyntax = (AttributeSyntax)
+                    attribute.ApplicationSyntaxReference!.GetSyntax();
 
-                var attributeSyntax = (AttributeSyntax)attribute.ApplicationSyntaxReference!
-                    .GetSyntax();
-                
+                // Get method syntax.
+                // Since the attribute syntax is retrieved from the result attribute
+                // on the method, it should be impossible for the attribute syntax node
+                // to not have an ancestor which is the method declaration itself.
+                var methodSyntax = attributeSyntax.GetAncestorNode<MethodDeclarationSyntax>()!;
+
+                // Get result decalration(s).
                 var resultDeclarations = method.DeclaringSyntaxReferences
                     .Select(r => r.GetSyntax())
                     .OfType<MethodDeclarationSyntax>()
                     .SelectMany(node => node.AttributeLists)
-                    .Where(attribute => attribute.Target?.Identifier.Text == "result")
+                    .Where(SyntaxUtility.IsResultDeclaration)
                     .ToImmutableArray();
 
-                AnalyzeResultDeclarations(symbolStartCtx, resultDeclarations, methodSyntax);
+                symbolStartCtx.RegisterSymbolEndAction(symbolEndCtx =>
+                {
+                    // Analyze attribute.
+                    AnalyzeAttribute(
+                        symbolEndCtx.ReportDiagnostic,
+                        attribute,
+                        attributeSyntax);
+
+                    // Analyze result declaration list.
+                    AnalyzeResultDeclarationList(
+                        symbolEndCtx.ReportDiagnostic,
+                        resultDeclarations,
+                        methodSyntax);
+
+                    
+                });
+
+                // Analyze result declarations.
+                symbolStartCtx.RegisterSyntaxNodeAction(syntaxNodeCtx =>
+                {
+                    var declaration = (AttributeListSyntax)
+                        syntaxNodeCtx.Node;
+
+                    if (!declaration.IsResultDeclaration()) return;
+
+                    AnalyzeResultDeclaration(
+                        syntaxNodeCtx.ReportDiagnostic,
+                        syntaxNodeCtx.SemanticModel,
+                        declaration);
+                }, SyntaxKind.AttributeList);
             }, SymbolKind.Method);
         });
     }
 
     private static void AnalyzeAttribute(
-        SymbolStartAnalysisContext ctx,
-        AttributeData attribute)
+        Reporter report,
+        AttributeData attribute,
+        AttributeSyntax syntax)
     {
-        var syntax = (AttributeSyntax)attribute.ApplicationSyntaxReference!.GetSyntax();
-
         var ctorArgs = AttributeCtorArgs.Create(attribute);
 
-        ctx.RegisterSymbolEndAction(symbolEndCtx =>
+        if (ctorArgs is null)
         {
-            if (ctorArgs is not null) return;
-
             var location = syntax.ArgumentList!.GetLocation();
 
-            symbolEndCtx.ReportDiagnostic(
-                Diagnostic.Create(
-                    Diagnostics.InvalidAttributeCtor,
-                    location));
-        });
+            report(Diagnostic.Create(
+                Diagnostics.InvalidAttributeCtor,
+                location));
+        }
 
         if (ctorArgs is not AttributeCtorArgs.WithTypeName { TypeName: var typeName }) return;
 
-        ctx.RegisterSymbolEndAction(symbolEndCtx =>
+        if (!SyntaxUtility.IsValidIdentifier(typeName))
         {
-            if (SyntaxUtility.IsValidIdentifier(typeName)) return;
-
             var location = syntax.ArgumentList!.Arguments[0].Expression.GetLocation();
 
-            symbolEndCtx.ReportDiagnostic(
-                Diagnostic.Create(
-                    Diagnostics.InvalidResultTypeName,
-                    location,
-                    typeName));
-        });
+            report(Diagnostic.Create(
+                Diagnostics.InvalidResultTypeName,
+                location,
+                typeName));
+        }
     }
 
-    private static void AnalyzeResultDeclarations(
-        SymbolStartAnalysisContext ctx,
+    private static void AnalyzeResultDeclarationList(
+        Reporter report,
         ImmutableArray<AttributeListSyntax> resultDeclarations,
         MethodDeclarationSyntax methodSyntax)
     {
-        ctx.RegisterSymbolEndAction(symbolEndCtx =>
+        if (resultDeclarations.Length == 0)
         {
-            if (resultDeclarations.Length == 0)
-            {
-                symbolEndCtx.ReportDiagnostic(
-                    Diagnostic.Create(
-                        Diagnostics.SpecifyResultDeclaration,
-                        methodSyntax.Identifier.GetLocation()));
-            }
+            report(Diagnostic.Create(
+                Diagnostics.SpecifyResultDeclaration,
+                methodSyntax.Identifier.GetLocation()));
+        }
 
-            if (resultDeclarations.Length > 1)
-            {
-                foreach (var decl in resultDeclarations.Skip(1))
-                {
-                    symbolEndCtx.ReportDiagnostic(
-                        Diagnostic.Create(
-                            Diagnostics.TooManyResultDeclarations,
-                            decl.GetLocation()));
-                }
-            }
-        });
-
-        foreach (var decl in resultDeclarations)
+        if (resultDeclarations.Length > 1)
         {
-            AnalyzeResultDeclaration(ctx, decl);
+            foreach (var decl in resultDeclarations.Skip(1))
+            {
+                report(Diagnostic.Create(
+                    Diagnostics.TooManyResultDeclarations,
+                    decl.GetLocation()));
+            }
         }
     }
 
     private static void AnalyzeResultDeclaration(
-        SymbolStartAnalysisContext ctx,
+        Reporter report,
+        SemanticModel semanticModel,
         AttributeListSyntax declaration)
     {
-        ctx.RegisterSymbolEndAction(symbolEndCtx =>
+        if (declaration.Attributes.Count == 1)
         {
-            if (declaration.Attributes.Count == 1)
-            {
-                var location = declaration.Attributes[0].GetLocation();
+            var location = declaration.Attributes[0].GetLocation();
 
-                symbolEndCtx.ReportDiagnostic(
-                    Diagnostic.Create(
-                        Diagnostics.CanBeInlined,
-                        location));
-            }
-        });
-
-        foreach (var value in declaration.Attributes)
-        {
-            AnalyzeResultValue(ctx, value);
+            report(Diagnostic.Create(
+                Diagnostics.CanBeInlined,
+                location));
         }
+
+        foreach (var attribute in declaration.Attributes)
+            AnalyzeResultValue(
+                report,
+                semanticModel,
+                attribute);
     }
 
     private static void AnalyzeResultValue(
-        SymbolStartAnalysisContext ctx,
+        Reporter report,
+        SemanticModel semanticModel,
         AttributeSyntax value)
     {
-        ctx.RegisterSymbolEndAction(symbolEndCtx =>
+        if (value.Name is not IdentifierNameSyntax)
         {
-            if (value.Name is IdentifierNameSyntax) return;
-
             var location = value.Name.GetLocation();
 
-            symbolEndCtx.ReportDiagnostic(
-                Diagnostic.Create(
-                    Diagnostics.BadValueSyntax,
-                    location));
-        });
+            report(Diagnostic.Create(
+                Diagnostics.BadValueSyntax,
+                location));
+        }
 
         var parameters = value.ArgumentList?.Arguments
             .ToImmutableArray()
             ?? ImmutableArray<AttributeArgumentSyntax>.Empty;
+
         foreach (var parameter in parameters)
         {
-            AnalyzeValueParameter(ctx, parameter);
+            AnalyzeValueParameter(report, semanticModel, parameter);
         }
     }
 
     private static void AnalyzeValueParameter(
-        SymbolStartAnalysisContext ctx,
+        Reporter report,
+        SemanticModel semanticModel,
         AttributeArgumentSyntax parameter)
     {
-        ctx.RegisterSymbolEndAction(symbolEndCtx =>
+        if (parameter.Expression is not GenericNameSyntax genericNameSyntax)
         {
-            if (parameter.Expression is not GenericNameSyntax)
-            {
-                var location = parameter.Expression.GetLocation();
+            var location = parameter.Expression.GetLocation();
 
-                symbolEndCtx.ReportDiagnostic(
-                    Diagnostic.Create(
-                        Diagnostics.BadValueParamaterSyntax,
-                        location));
-            }
-        });
+            report(Diagnostic.Create(
+                Diagnostics.BadValueParamaterSyntax,
+                location));
 
-        if (parameter.Expression is not GenericNameSyntax genericNameSyntax) return;
+            return;
+        }
 
         var parameterTypes = genericNameSyntax.TypeArgumentList.Arguments;
 
-        ctx.RegisterSymbolEndAction(symbolEndCtx =>
+        if (parameterTypes.Count > 1)
         {
-            if (parameterTypes.Count <= 1) return;
-
             var start = parameterTypes[1].Span.Start;
             var end = parameterTypes[^1].Span.End;
             var location = Location.Create(
                 parameter.SyntaxTree,
                 TextSpan.FromBounds(start, end));
 
-            symbolEndCtx.ReportDiagnostic(
-                Diagnostic.Create(
-                    Diagnostics.TooManyValueParameterTypes,
-                    location));
-        });
+            report(Diagnostic.Create(
+                Diagnostics.TooManyValueParameterTypes,
+                location));
+        };
 
         foreach (var type in parameterTypes)
-        {
-            AnalyzeParameterType(ctx, type);
-        }
+            AnalyzeParameterType(
+                report,
+                semanticModel,
+                type);
     }
 
     private static void AnalyzeParameterType(
-        SymbolStartAnalysisContext ctx,
+        Reporter report,
+        SemanticModel semanticModel,
         TypeSyntax type)
     {
-        // TODO: Fix this
-        var semanticModel = ctx.Compilation.GetSemanticModel(type.SyntaxTree);
+        if (ParameterType.GetTypeSymbolInfo(type, semanticModel) is not null) return;
 
-        ctx.RegisterSymbolEndAction(symbolEndCtx =>
-        {
-            if (ParameterType.GetTypeSymbolInfo(type, semanticModel) is not null) return;
+        var location = type.GetLocation();
 
-            var location = type.GetLocation();
-
-            symbolEndCtx.ReportDiagnostic(
-                Diagnostic.Create(
-                    Diagnostics.UnknownType,
-                    location,
-                    type.GetText().ToString()));
-        });
+        report(Diagnostic.Create(
+            Diagnostics.UnknownType,
+            location,
+            type.GetText().ToString()));
     }
 }
