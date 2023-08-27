@@ -36,7 +36,8 @@ public class SpecifyResultDeclarationCodeFix : CodeFixProvider
                 cts => AddResultDeclaration(
                     cts,
                     document,
-                    methodDeclaration)),
+                    methodDeclaration),
+                nameof(SpecifyResultDeclarationCodeFix)),
             diagnostic);
     }
 
