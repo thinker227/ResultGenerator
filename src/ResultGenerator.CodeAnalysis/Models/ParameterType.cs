@@ -5,6 +5,7 @@ namespace ResultGenerator.Models;
 
 internal readonly record struct ParameterType(
     string FullyQualifiedName,
+    bool IsNullable,
     bool CanBeNull)
 {
     public static ParameterType? Create(
@@ -14,14 +15,29 @@ internal readonly record struct ParameterType(
         // Covered by diagnostic UnknownType.
         if (GetTypeSymbolInfo(syntax, semanticModel) is not ITypeSymbol symbol) return null;
 
+        var isNullableValueType = false;
+        if (!symbol.IsReferenceType &&
+            symbol is INamedTypeSymbol named &&
+            named.IsGenericType &&
+            named.ConstructedFrom.SpecialType == SpecialType.System_Nullable_T)
+        {
+            isNullableValueType = true;
+            symbol = named.TypeArguments[0];
+        }
+
         var fullyQualifiedName = symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
 
-        // NOTE: For nullable value types, ITypeSymbol.IsReferenceType returns true.
-        // This is bizarre but it helps streamline checking whether the type can be null.
-        var canBeNull = symbol.IsReferenceType;
+        var isNullable =
+            isNullableValueType ||
+            syntax is NullableTypeSyntax;
+
+        var canBeNull =
+            isNullableValueType ||
+            symbol.IsReferenceType;
 
         return new(
             fullyQualifiedName,
+            isNullable,
             canBeNull);
     }
 
