@@ -13,7 +13,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ResultGenerator\ResultGenerator.csproj" />
+    <ProjectReference Include="..\ResultGenerator.Lib\ResultGenerator.Lib.csproj" />
 
     <ProjectReference Include="..\ResultGenerator.CodeAnalysis\ResultGenerator.CodeAnalysis.csproj"
                       OutputItemType="Analyzer"

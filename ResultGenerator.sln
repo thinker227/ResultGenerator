@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResultGenerator.CodeAnalysi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResultGenerator.Sample", "src\ResultGenerator.Sample\ResultGenerator.Sample.csproj", "{9878777C-8D02-4D38-95FB-9891FA2790C6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResultGenerator", "src\ResultGenerator\ResultGenerator.csproj", "{AF4BAB89-CCF4-4477-AB5F-297DB0B19CCF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResultGenerator.Lib", "src\ResultGenerator.Lib\ResultGenerator.Lib.csproj", "{AF4BAB89-CCF4-4477-AB5F-297DB0B19CCF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResultGenerator.Tests", "src\ResultGenerator.Tests\ResultGenerator.Tests.csproj", "{355DF3F9-F718-4966-8770-C3C4AB7C66C5}"
 EndProject

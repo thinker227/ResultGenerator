@@ -20,6 +20,10 @@ public sealed class PersonService
     private readonly Dictionary<string, Person> people = new();
 
     [ReturnsResult]
+    [result: Ok, Error]
+    public static FooResult Foo() => FooResult.Ok();
+
+    [ReturnsResult]
     [result: Created, DuplicateName]
     public CreatePersonResult CreatePerson(string name, int age)
     {
