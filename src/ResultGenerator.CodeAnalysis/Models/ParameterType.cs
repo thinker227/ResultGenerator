@@ -31,13 +31,8 @@ internal readonly record struct ParameterType(
         TypeSyntax syntax,
         SemanticModel semanticModel)
     {
-        var position = syntax.GetLocation().SourceSpan.Start;
-        // This is probably bad.
-        var symbolInfo = semanticModel.GetSpeculativeSymbolInfo(
-            position,
-            syntax,
-            SpeculativeBindingOption.BindAsTypeOrNamespace);
+        var typeInfo = semanticModel.GetTypeInfo(syntax);
 
-        return symbolInfo.Symbol as INamedTypeSymbol;
+        return typeInfo.Type as INamedTypeSymbol;
     }
 }
