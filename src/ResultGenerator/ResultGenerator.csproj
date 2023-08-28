@@ -12,6 +12,13 @@
 
   <!-- Package properties. -->
   <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <!-- Explicitly do not include output DLL in the package. -->
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+  </PropertyGroup>
+
+  <!-- Package metadata. -->
+  <PropertyGroup>
     <PackageId>thinker227.ResultGenerator</PackageId>
     <PackageVersion>1.0.0-pre</PackageVersion>
     <Description>
@@ -26,6 +33,7 @@
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
+  <!-- Include additional files. -->
   <ItemGroup>
     <None Include="../../README.md" Pack="true" PackagePath="/" />
     <None Include="../../LICENSE.txt" Pack="true" PackagePath="/" />
@@ -51,11 +59,8 @@
     <!-- Pack the generator DLL in the analyzers/dotnet/cs path. -->
     <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
 
-    <!-- Pack the library DLL in the analyzers/dotnet/cs path. -->
-    <None Include="$(OutputPath)\ResultGenerator.Lib.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-
     <!-- Pack the library DLL in the lib\netstandard2.0 path. -->
-    <None Include="$(OutputPath)\ResultGenerator.Lib.dll" Pack="true" PackagePath="lib\netstandard2.0" Visible="true" />
+    <None Include="$(OutputPath)\ResultGenerator.Lib.dll" Pack="true" PackagePath="lib/netstandard2.0" Visible="true" />
   </ItemGroup>
 
 </Project>
