@@ -46,9 +46,7 @@ public class SpecifyResultDeclarationCodeFix : CodeFixProvider
         Document document,
         MethodDeclarationSyntax methodDeclaration)
     {
-        var leadingTrivia = methodDeclaration.GetLeadingTrivia();
-
-        var attributeList = SyntaxInator.DefaultResultDeclaration(leadingTrivia)
+        var attributeList = SyntaxInator.DefaultResultDeclaration()
             .WithAdditionalAnnotations(Formatter.Annotation);
 
         var newMethodDeclaration = methodDeclaration.AddAttributeLists(attributeList);

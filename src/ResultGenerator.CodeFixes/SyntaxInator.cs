@@ -8,37 +8,16 @@ namespace ResultGenerator.CodeFixes;
 // Code generated using https://roslynquoter.azurewebsites.net/.
 internal static class SyntaxInator
 {
-    public static AttributeListSyntax DefaultResultDeclaration(SyntaxTriviaList leadingTrivia) =>
+    public static AttributeListSyntax DefaultResultDeclaration() =>
         AttributeList(
             SeparatedList<AttributeSyntax>(
                 new SyntaxNodeOrToken[]{
                     Attribute(
                         IdentifierName("Ok")),
-                    Token(
-                        TriviaList(),
-                        SyntaxKind.CommaToken,
-                        TriviaList(
-                            Space)),
+                    Token(SyntaxKind.CommaToken),
                     Attribute(
                         IdentifierName("Error"))}))
-        .WithOpenBracketToken(
-            Token(
-                leadingTrivia,
-                SyntaxKind.OpenBracketToken,
-                TriviaList()))
         .WithTarget(
             AttributeTargetSpecifier(
-                Identifier("result"))
-            .WithColonToken(
-                Token(
-                    TriviaList(),
-                    SyntaxKind.ColonToken,
-                    TriviaList(
-                        Space))))
-        .WithCloseBracketToken(
-            Token(
-                TriviaList(),
-                SyntaxKind.CloseBracketToken,
-                TriviaList(
-                    LineFeed)));
+                Identifier("result")));
 }
