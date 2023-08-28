@@ -45,7 +45,7 @@ internal sealed class TextWriter
         #nullable enable
         
         [ResultType]
-        public readonly struct {GetTypeName(type)}
+        public readonly partial struct {GetTypeName(type)}
         """);
         
         using (builder.IndentedBlock("{", "}", true))

@@ -27,7 +27,7 @@ public class GeneratorTests
         #nullable enable
 
         [ResultType]
-        public readonly struct @GetPersonResult
+        public readonly partial struct @GetPersonResult
         {
             private readonly int _flag;
             
@@ -78,7 +78,7 @@ public class GeneratorTests
         #nullable enable
 
         [ResultType]
-        public readonly struct @GetPersonRes
+        public readonly partial struct @GetPersonRes
         {
             private readonly int _flag;
             
@@ -129,7 +129,7 @@ public class GeneratorTests
         #nullable enable
 
         [ResultType]
-        public readonly struct @FooResult
+        public readonly partial struct @FooResult
         {
             private readonly int _flag;
             
@@ -185,7 +185,7 @@ public class GeneratorTests
         #nullable enable
 
         [ResultType]
-        public readonly struct @FooResult
+        public readonly partial struct @FooResult
         {
             private readonly int _flag;
             
@@ -241,7 +241,7 @@ public class GeneratorTests
         #nullable enable
 
         [ResultType]
-        public readonly struct @class
+        public readonly partial struct @class
         {
             private readonly int _flag;
             
