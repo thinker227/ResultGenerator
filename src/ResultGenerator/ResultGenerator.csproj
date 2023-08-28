@@ -10,6 +10,27 @@
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
   </PropertyGroup>
 
+  <!-- Package properties. -->
+  <PropertyGroup>
+    <PackageId>thinker227.ResultGenerator</PackageId>
+    <PackageVersion>1.0.0-pre</PackageVersion>
+    <Description>
+    Generates result types from inline declarations.
+    </Description>
+    <Tags>dotnet netstandard netcore analyzer generator roslyn results</Tags>
+    <Authors>thinker227</Authors>
+    <Copyright>thinker227 2023</Copyright>
+    <License>LICENSE.txt</License>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>"https://github.com/thinker227/ResultGenerator</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="../../README.md" Pack="true" PackagePath="/" />
+    <None Include="../../LICENSE.txt" Pack="true" PackagePath="/" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.4.0" PrivateAssets="all" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.4.0" />
@@ -20,6 +41,21 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ResultGenerator.Lib\ResultGenerator.Lib.csproj" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Pack the generator DLL in the analyzers/dotnet/cs path. -->
+    <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+
+    <!-- Pack the library DLL in the analyzers/dotnet/cs path. -->
+    <None Include="$(OutputPath)\ResultGenerator.Lib.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+
+    <!-- Pack the library DLL in the lib\netstandard2.0 path. -->
+    <None Include="$(OutputPath)\ResultGenerator.Lib.dll" Pack="true" PackagePath="lib\netstandard2.0" Visible="true" />
   </ItemGroup>
 
 </Project>
