@@ -5,34 +5,36 @@ namespace ResultGenerator.Models;
 
 internal readonly record struct ParameterType(
     string FullyQualifiedName,
-    bool IsNullable)
+    bool CanBeNull)
 {
     public static ParameterType? Create(
         TypeSyntax syntax,
         SemanticModel semanticModel)
     {
         // Covered by diagnostic UnknownType.
-        if (GetTypeSymbolInfo(syntax, semanticModel) is not INamedTypeSymbol symbol) return null;
+        if (GetTypeSymbolInfo(syntax, semanticModel) is not ITypeSymbol symbol) return null;
 
-        // If the type is nullable (i.e. a ? should be appended to it)
-        // then the type syntax has to be a NullableTypeSyntax
-        // and the type itself has to be a reference type,
-        // otherwise it would refer to Nullable<T>.
-        var isNullable =
-            syntax is NullableTypeSyntax &&
-            symbol.IsReferenceType;
+        var fullyQualifiedName = symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+
+        // NOTE: For nullable value types, ITypeSymbol.IsReferenceType returns true.
+        // This is bizarre but it helps streamline checking whether the type can be null.
+        var canBeNull = symbol.IsReferenceType;
 
         return new(
-            symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-            isNullable);
+            fullyQualifiedName,
+            canBeNull);
     }
 
-    public static INamedTypeSymbol? GetTypeSymbolInfo(
+    public static ITypeSymbol? GetTypeSymbolInfo(
         TypeSyntax syntax,
         SemanticModel semanticModel)
     {
         var typeInfo = semanticModel.GetTypeInfo(syntax);
+        var type = typeInfo.Type;
 
-        return typeInfo.Type as INamedTypeSymbol;
+        // Filter out error types.
+        return type is not IErrorTypeSymbol
+            ? type
+            : null;
     }
 }

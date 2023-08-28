@@ -205,9 +205,8 @@ internal sealed class TextWriter
     private static string CamelCase(string str) =>
         $"{char.ToLowerInvariant(str[0])}{str[1..]}";
 
-    private static string GetTypeString(ParameterType type) => type.IsNullable
-        ? $"{type.FullyQualifiedName}?"
-        : type.FullyQualifiedName;
+    private static string GetTypeString(ParameterType type) =>
+        type.FullyQualifiedName;
 
     private static string GetTupleOrRegularParameterTypeText(EquatableArray<ValueParameter> parameters) => parameters switch
     {
