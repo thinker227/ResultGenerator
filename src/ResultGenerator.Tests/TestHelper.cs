@@ -17,6 +17,12 @@ internal static class TestHelper
         }
     }
 
+    namespace ResultGenerator.Internal
+    {
+        [AttributeUsage(AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
+        public sealed class ResultTypeAttribute : Attribute {}
+    }
+
 
     """;
 }
