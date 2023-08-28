@@ -67,7 +67,9 @@ internal sealed class TextWriter
             builder.Append("\n\n");
 
             builder.Sections("\n", type.Values, WriteTryAsMethods);
-            builder.AppendLine();
+            builder.Append("\n\n");
+
+            WriteToStringMethod();
         }
     }
 
@@ -167,18 +169,64 @@ internal sealed class TextWriter
         """);
         builder.Indent();
 
-        var variableTarget = value.Parameters is [var parameter]
-            ? GetParameterName(parameter)
-            : $"({GetParameterNameListText(value.Parameters)})";
-        builder.Append(variableTarget);
+        var variableTarget = GetTupleOrRegularParameterNameListText(value.Parameters);
         
         builder.AppendLine($"""
-         = this.{GetFieldName(value)};
+        {variableTarget} = this.{GetFieldName(value)};
         return this._flag == {index};
         """);
 
         builder.Unindent();
         builder.Append("""}""");
+    }
+
+    private void WriteToStringMethod()
+    {
+        builder.AppendLine("public override string? ToString()");
+
+        using (builder.IndentedBlock("{", "}", true))
+        {
+            builder.Sections("\n", type.Values, value =>
+            {
+                var index = valueIndicies[value];
+                builder.AppendLine($"if (this._flag == {index})");
+
+                using (builder.IndentedBlock("{", "}", true))
+                {
+                    if (value.Parameters.IsEmpty)
+                    {
+                        builder.AppendLine($"""
+                        return "{value.Name}";
+                        """);
+                        return;
+                    }
+
+                    builder.Append("var ");
+                    builder.Append(GetTupleOrRegularParameterNameListText(value.Parameters));
+                    builder.AppendLine($" = {GetFieldName(value)};");
+
+                    // This goddamn insanity is why raw string literals exist.
+
+                    builder.Append($$$""""
+                    return $$"""
+                    {{{value.Name}}} { 
+                    """");
+
+                    builder.Sections(", ", value.Parameters, parameter =>
+                        builder.Append($$$"""
+                        {{{parameter.Name}}} = {{{{{GetParameterName(parameter)}}}}}
+                        """));
+
+                    builder.AppendLine(""""
+                     }
+                    """;
+                    """");
+                }
+            });
+        
+            builder.AppendLine();
+            builder.AppendLine("return null;");
+        }
     }
 
     private static string GetTypeName(ResultType type) =>
@@ -228,6 +276,11 @@ internal sealed class TextWriter
             .Select(GetParameterName);
         return string.Join(", ", texts);
     }
+
+    private static string GetTupleOrRegularParameterNameListText(EquatableArray<ValueParameter> parameters) =>
+        parameters is [var parameter]
+            ? GetParameterName(parameter)
+            : $"({GetParameterNameListText(parameters)})";
 
     private static string GetTypeListText(EquatableArray<ValueParameter> parameters)
     {
