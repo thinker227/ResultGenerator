@@ -1,5 +1,5 @@
 using Microsoft.CodeAnalysis.Testing;
-using VerifyCS = ResultGenerator.Tests.Verifiers.CSharpIncrementalGeneratorVerifier<ResultGenerator.SourceGenerator>;
+using VerifyCS = ResultGenerator.Tests.Verifiers.CSharpIncrementalGeneratorVerifier<ResultGenerator.Generation.SourceGenerator>;
 
 namespace ResultGenerator.Tests;
 

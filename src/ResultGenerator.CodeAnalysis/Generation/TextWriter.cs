@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 using ResultGenerator.Helpers;
 using ResultGenerator.Models;
 
-namespace ResultGenerator;
+namespace ResultGenerator.Generation;
 
 internal sealed class TextWriter
 {
