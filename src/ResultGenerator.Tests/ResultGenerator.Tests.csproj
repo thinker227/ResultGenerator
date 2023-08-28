@@ -29,7 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ResultGenerator.CodeAnalysis\ResultGenerator.CodeAnalysis.csproj" />
+    <ProjectReference Include="..\ResultGenerator\ResultGenerator.csproj" />
   </ItemGroup>
 
 </Project>

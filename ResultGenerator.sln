@@ -5,7 +5,7 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{10A62D17-7225-4E56-A3FE-22BA6BA98257}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResultGenerator.CodeAnalysis", "src\ResultGenerator.CodeAnalysis\ResultGenerator.CodeAnalysis.csproj", "{E7F68BB5-9B9F-4FFF-AAEF-A934814A697F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResultGenerator", "src\ResultGenerator\ResultGenerator.csproj", "{E7F68BB5-9B9F-4FFF-AAEF-A934814A697F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResultGenerator.Sample", "src\ResultGenerator.Sample\ResultGenerator.Sample.csproj", "{9878777C-8D02-4D38-95FB-9891FA2790C6}"
 EndProject

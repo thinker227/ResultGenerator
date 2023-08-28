@@ -15,7 +15,7 @@
   <ItemGroup>
     <ProjectReference Include="..\ResultGenerator.Lib\ResultGenerator.Lib.csproj" />
 
-    <ProjectReference Include="..\ResultGenerator.CodeAnalysis\ResultGenerator.CodeAnalysis.csproj"
+    <ProjectReference Include="..\ResultGenerator\ResultGenerator.csproj"
                       OutputItemType="Analyzer"
                       ReferenceOutputAssembly="false" />
   </ItemGroup>
