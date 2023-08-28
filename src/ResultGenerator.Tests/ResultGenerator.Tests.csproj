@@ -30,7 +30,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ResultGenerator.CodeAnalysis\ResultGenerator.CodeAnalysis.csproj" />
-    <ProjectReference Include="..\ResultGenerator.CodeFixes\ResultGenerator.CodeFixes.csproj" />
   </ItemGroup>
 
 </Project>

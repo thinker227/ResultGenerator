@@ -18,10 +18,6 @@
     <ProjectReference Include="..\ResultGenerator.CodeAnalysis\ResultGenerator.CodeAnalysis.csproj"
                       OutputItemType="Analyzer"
                       ReferenceOutputAssembly="false" />
-
-    <ProjectReference Include="..\ResultGenerator.CodeFixes\ResultGenerator.CodeFixes.csproj"
-                      OutputItemType="Analyzer"
-                      ReferenceOutputAssembly="false" />
   </ItemGroup>
 
 </Project>
