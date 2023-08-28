@@ -45,7 +45,7 @@ internal sealed class TextWriter
         #nullable enable
         
         [ResultType]
-        public readonly struct @{type.Name}
+        public readonly struct {GetTypeName(type)}
         """);
         
         using (builder.IndentedBlock("{", "}", true))
@@ -81,19 +81,19 @@ internal sealed class TextWriter
 
         var paramsText = GetTupleOrRegularParameterTypeText(value.Parameters);
 
-        builder.Append($"private readonly {paramsText} {GetFieldName(value.Name)};");
+        builder.Append($"private readonly {paramsText} {GetFieldName(value)};");
     }
 
     private void WriteCtor()
     {
-        builder.Append($"private @{type.Name}(int flag");
+        builder.Append($"private {GetTypeName(type)}(int flag");
 
         foreach (var value in type.Values)
         {
             if (value.Parameters.Length == 0) continue;
 
             var typeText = GetTupleOrRegularParameterTypeText(value.Parameters);
-            var name = GetParameterName(value.Name);
+            var name = GetParameterName(value);
             builder.Append($", {typeText} {name} = default!");
         }
 
@@ -107,8 +107,8 @@ internal sealed class TextWriter
             {
                 if (value.Parameters.Length == 0) continue;
 
-                var paramName = GetParameterName(value.Name);
-                var fieldName = GetFieldName(value.Name);
+                var paramName = GetParameterName(value);
+                var fieldName = GetFieldName(value);
                 builder.AppendLine($"this.{fieldName} = {paramName};");
             }
         }
@@ -120,7 +120,7 @@ internal sealed class TextWriter
     {
         var index = valueIndicies[value];
         
-        builder.Append($"public static @{type.Name} {value.Name}");
+        builder.Append($"public static {GetTypeName(type)} {GetCreateMethodName(value)}");
         
         if (value.Parameters.IsEmpty)
         {
@@ -128,7 +128,7 @@ internal sealed class TextWriter
             return;
         }
 
-        var valueParameterName = GetParameterName(value.Name);
+        var valueParameterName = GetParameterName(value);
         var parameters = GetParameterListText(value.Parameters);
         var parameterNames = GetParameterNameListText(value.Parameters);
 
@@ -139,7 +139,7 @@ internal sealed class TextWriter
     {
         var index = valueIndicies[value];
 
-        builder.Append($"public bool Is{value.Name} => this._flag == {index};");
+        builder.Append($"public bool {GetIsPropertyName(value)} => this._flag == {index};");
     }
 
     private void WriteTryAsMethods(ResultValue value)
@@ -152,12 +152,12 @@ internal sealed class TextWriter
 
         var index = valueIndicies[value];
 
-        builder.Append($"public bool TryAs{value.Name}(");
+        builder.Append($"public bool {GetTryAsMethodName(value)}(");
 
         builder.Sections(", ", value.Parameters, parameter =>
         {
             var typeText = GetTypeString(parameter.Type);
-            var parameterName = GetParameterName(parameter.Name);
+            var parameterName = GetParameterName(parameter);
             builder.Append($"[MaybeNullWhen(false)] out {typeText} {parameterName}");
         });
 
@@ -168,13 +168,12 @@ internal sealed class TextWriter
         builder.Indent();
 
         var variableTarget = value.Parameters is [var parameter]
-            ? GetParameterName(parameter.Name)
+            ? GetParameterName(parameter)
             : $"({GetParameterNameListText(value.Parameters)})";
         builder.Append(variableTarget);
         
-        var fieldName = GetFieldName(value.Name);
         builder.AppendLine($"""
-         = this.{fieldName};
+         = this.{GetFieldName(value)};
         return this._flag == {index};
         """);
 
@@ -182,11 +181,29 @@ internal sealed class TextWriter
         builder.Append("""}""");
     }
 
-    private static string GetParameterName(string name) =>
-        $"{char.ToLowerInvariant(name[0])}{name[1..]}";
+    private static string GetTypeName(ResultType type) =>
+        $"@{type.Name}";
 
-    private static string GetFieldName(string name) =>
-        $"_{GetParameterName(name)}Data";
+    private static string GetParameterName(ValueParameter parameter) =>
+        $"@{CamelCase(parameter.Name)}";
+
+    private static string GetParameterName(ResultValue value) =>
+        $"@{CamelCase(value.Name)}";
+
+    private static string GetFieldName(ResultValue value) =>
+        $"_{CamelCase(value.Name)}Data";
+
+    private static string GetCreateMethodName(ResultValue value) =>
+        $"@{value.Name}";
+
+    private static string GetIsPropertyName(ResultValue value) =>
+        $"Is{value.Name}";
+
+    private static string GetTryAsMethodName(ResultValue value) =>
+        $"TryAs{value.Name}";
+
+    private static string CamelCase(string str) =>
+        $"{char.ToLowerInvariant(str[0])}{str[1..]}";
 
     private static string GetTypeString(ParameterType type) => type.IsNullable
         ? $"{type.FullyQualifiedName}?"
@@ -201,14 +218,14 @@ internal sealed class TextWriter
     private static string GetParameterListText(EquatableArray<ValueParameter> parameters)
     {
         var texts = parameters
-            .Select(p => $"{GetTypeString(p.Type)} {GetParameterName(p.Name)}");
+            .Select(p => $"{GetTypeString(p.Type)} {GetParameterName(p)}");
         return string.Join(", ", texts);
     }
 
     private static string GetParameterNameListText(EquatableArray<ValueParameter> parameters)
     {
         var texts = parameters
-            .Select(p => GetParameterName(p.Name));
+            .Select(GetParameterName);
         return string.Join(", ", texts);
     }
 

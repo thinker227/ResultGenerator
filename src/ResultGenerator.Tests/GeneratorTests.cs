@@ -39,8 +39,8 @@ public class GeneratorTests
                 this._flag = flag;
             }
 
-            public static @GetPersonResult Ok() => new(1);
-            public static @GetPersonResult NotFound() => new(2);
+            public static @GetPersonResult @Ok() => new(1);
+            public static @GetPersonResult @NotFound() => new(2);
             
             public bool IsOk => this._flag == 1;
             public bool IsNotFound => this._flag == 2;
@@ -90,8 +90,8 @@ public class GeneratorTests
                 this._flag = flag;
             }
 
-            public static @GetPersonRes Ok() => new(1);
-            public static @GetPersonRes NotFound() => new(2);
+            public static @GetPersonRes @Ok() => new(1);
+            public static @GetPersonRes @NotFound() => new(2);
             
             public bool IsOk => this._flag == 1;
             public bool IsNotFound => this._flag == 2;
@@ -136,21 +136,21 @@ public class GeneratorTests
             private readonly string _aData;
             // Variant B has no data.
             
-            private @FooResult(int flag, string a = default!)
+            private @FooResult(int flag, string @a = default!)
             {
                 this._flag = flag;
-                this._aData = a;
+                this._aData = @a;
             }
 
-            public static @FooResult A(string str) => new(1, a: (str));
-            public static @FooResult B() => new(2);
+            public static @FooResult @A(string @str) => new(1, @a: (@str));
+            public static @FooResult @B() => new(2);
             
             public bool IsA => this._flag == 1;
             public bool IsB => this._flag == 2;
             
-            public bool TryAsA([MaybeNullWhen(false)] out string str)
+            public bool TryAsA([MaybeNullWhen(false)] out string @str)
             {
-                str = this._aData;
+                @str = this._aData;
                 return this._flag == 1;
             }
             // Variant B has no data to try get.
@@ -192,21 +192,21 @@ public class GeneratorTests
             private readonly (string, int, bool) _aData;
             // Variant B has no data.
             
-            private @FooResult(int flag, (string, int, bool) a = default!)
+            private @FooResult(int flag, (string, int, bool) @a = default!)
             {
                 this._flag = flag;
-                this._aData = a;
+                this._aData = @a;
             }
 
-            public static @FooResult A(string str, int x, bool b) => new(1, a: (str, x, b));
-            public static @FooResult B() => new(2);
+            public static @FooResult @A(string @str, int @x, bool @b) => new(1, @a: (@str, @x, @b));
+            public static @FooResult @B() => new(2);
             
             public bool IsA => this._flag == 1;
             public bool IsB => this._flag == 2;
             
-            public bool TryAsA([MaybeNullWhen(false)] out string str, [MaybeNullWhen(false)] out int x, [MaybeNullWhen(false)] out bool b)
+            public bool TryAsA([MaybeNullWhen(false)] out string @str, [MaybeNullWhen(false)] out int @x, [MaybeNullWhen(false)] out bool @b)
             {
-                (str, x, b) = this._aData;
+                (@str, @x, @b) = this._aData;
                 return this._flag == 1;
             }
             // Variant B has no data to try get.
@@ -253,8 +253,8 @@ public class GeneratorTests
                 this._flag = flag;
             }
 
-            public static @class A() => new(1);
-            public static @class B() => new(2);
+            public static @class @A() => new(1);
+            public static @class @B() => new(2);
             
             public bool IsA => this._flag == 1;
             public bool IsB => this._flag == 2;
