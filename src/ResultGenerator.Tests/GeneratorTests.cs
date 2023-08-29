@@ -47,7 +47,7 @@ public class GeneratorTests
             
             // Variant Ok has no data to try get.
             // Variant NotFound has no data to try get.
-
+            
             public override string? ToString()
             {
                 if (this._flag == 1)
@@ -113,7 +113,7 @@ public class GeneratorTests
             
             // Variant Ok has no data to try get.
             // Variant NotFound has no data to try get.
-
+            
             public override string? ToString()
             {
                 if (this._flag == 1)
@@ -184,7 +184,7 @@ public class GeneratorTests
                 return this._flag == 1;
             }
             // Variant B has no data to try get.
-
+            
             public override string? ToString()
             {
                 if (this._flag == 1)
@@ -327,7 +327,7 @@ public class GeneratorTests
             
             // Variant A has no data to try get.
             // Variant B has no data to try get.
-
+            
             public override string? ToString()
             {
                 if (this._flag == 1)
