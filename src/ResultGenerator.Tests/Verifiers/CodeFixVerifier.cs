@@ -13,8 +13,9 @@ public static partial class CodeFixVerifier<TAnalyzer, TCodeFix>
     {
         var test = new CodeFixTest<TAnalyzer, TCodeFix>
         {
-            TestCode = source,
-            FixedCode = fixedSource,
+            // Replace line endings because the formatter uses the environment's newline.
+            TestCode = source.ReplaceLineEndings(),
+            FixedCode = fixedSource.ReplaceLineEndings(),
         };
 
         await test.RunAsync(CancellationToken.None);

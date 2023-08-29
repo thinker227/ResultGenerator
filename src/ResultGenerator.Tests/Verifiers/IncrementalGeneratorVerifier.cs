@@ -27,7 +27,7 @@ internal static class IncrementalGeneratorVerifier<TIncrementalGenerator>
         foreach (var (filename, content) in generatedSources)
         {
             test.TestState.GeneratedSources.Add((typeof(TIncrementalGenerator), filename, SourceText.From(
-                // Replace line endings because the files the compiler emits use system line endings.
+                // Replace line endings because CodeStringBuilder uses the environment's newline.
                 content.ReplaceLineEndings(),
                 Encoding.UTF8)));
         }
