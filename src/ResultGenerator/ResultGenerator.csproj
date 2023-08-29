@@ -19,7 +19,7 @@
 
   <!-- Package metadata. -->
   <PropertyGroup>
-    <PackageId>thinker227.ResultGenerator</PackageId>
+    <PackageId>ResultGenerator</PackageId>
     <PackageVersion>1.0.0-pre</PackageVersion>
     <Description>
     Generates result types from inline declarations.
