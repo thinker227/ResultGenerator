@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace ResultGenerator.Tests.Verifiers;
 
-internal static class CSharpVerifierHelper
+internal static class VerifierHelper
 {
     internal static ImmutableDictionary<string, ReportDiagnostic> NullableWarnings { get; } = GetNullableWarningsFromCompiler();
 

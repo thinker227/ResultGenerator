@@ -1,4 +1,4 @@
-using VerifyCS = ResultGenerator.Tests.Verifiers.CSharpCodeFixVerifier<ResultGenerator.Analysis.Analyzer, ResultGenerator.CodeFixes.SpecifyResultDeclarationCodeFix>;
+using VerifyCS = ResultGenerator.Tests.Verifiers.CodeFixVerifier<ResultGenerator.Analysis.Analyzer, ResultGenerator.CodeFixes.SpecifyResultDeclarationCodeFix>;
 
 namespace ResultGenerator.Tests.CodeFixTests;
 
