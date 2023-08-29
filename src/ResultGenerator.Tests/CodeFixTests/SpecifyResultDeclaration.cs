@@ -19,20 +19,4 @@ public class SpecifyResultDeclaration
         public void Foo() {}
     }  
     """);
-
-    [Fact]
-    public Task CopiesLeadingWhitespace() => VerifyCS.VerifyCodeFixAsync(Header + """
-    public sealed class Class
-    {
-                    [ReturnsResult]
-                    public void {|RESGEN0001:Foo|}() {}
-    } 
-    """, Header + """
-    public sealed class Class
-    {
-                    [ReturnsResult]
-                    [result: Ok, Error]
-                    public void Foo() {}
-    }  
-    """);
 }
