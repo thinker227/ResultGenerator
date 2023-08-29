@@ -22,7 +22,7 @@
     <PackageId>ResultGenerator</PackageId>
     <PackageVersion>1.0.0-pre</PackageVersion>
     <Description>
-    Generates result types from inline declarations.
+    Generates lightweight result types supporting pattern matching from inline declarations. A way of returning multiple possible values from methods and a more explicit alternative to throwing exceptions and exception handling.
     </Description>
     <Tags>dotnet netstandard netcore analyzer generator roslyn results</Tags>
     <Authors>thinker227</Authors>
