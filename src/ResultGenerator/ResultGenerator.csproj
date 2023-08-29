@@ -56,11 +56,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Pack the generator DLL in the analyzers/dotnet/cs path. -->
+    <!-- Pack the generator. -->
     <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
 
-    <!-- Pack the library DLL in the lib\netstandard2.0 path. -->
+    <!-- Pack the library. -->
     <None Include="$(OutputPath)\ResultGenerator.Lib.dll" Pack="true" PackagePath="lib/netstandard2.0" Visible="true" />
+    <None Include="$(OutputPath)\ResultGenerator.Lib.xml" Pack="true" PackagePath="lib/netstandard2.0" Visible="true" />
   </ItemGroup>
 
 </Project>
