@@ -203,7 +203,7 @@ internal sealed class TextWriter
 
                     builder.Append("var ");
                     builder.Append(GetTupleOrRegularParameterNameListText(value.Parameters));
-                    builder.AppendLine($" = {GetFieldName(value)};");
+                    builder.AppendLine($" = this.{GetFieldName(value)};");
 
                     // This goddamn insanity is why raw string literals exist.
 
