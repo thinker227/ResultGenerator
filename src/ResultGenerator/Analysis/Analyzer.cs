@@ -3,7 +3,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using ResultGenerator.Helpers;
-using ResultGenerator.Models;
 using Microsoft.CodeAnalysis.Text;
 using Reporter = System.Action<Microsoft.CodeAnalysis.Diagnostic>;
 using Microsoft.CodeAnalysis.CSharp;

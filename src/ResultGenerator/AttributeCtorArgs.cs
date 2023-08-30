@@ -1,6 +1,6 @@
 using Microsoft.CodeAnalysis;
 
-namespace ResultGenerator.Models;
+namespace ResultGenerator;
 
 internal abstract record AttributeCtorArgs
 {
