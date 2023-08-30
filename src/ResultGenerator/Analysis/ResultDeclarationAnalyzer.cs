@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis.CSharp;
 namespace ResultGenerator.Analysis;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public sealed class Analyzer : DiagnosticAnalyzer
+public sealed class ResultDeclarationAnalyzer : DiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = ImmutableArray.Create(
         Diagnostics.SpecifyResultDeclaration,

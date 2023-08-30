@@ -1,8 +1,8 @@
-using VerifyCS = ResultGenerator.Tests.Verifiers.AnalyzerVerifier<ResultGenerator.Analysis.Analyzer>;
+using VerifyCS = ResultGenerator.Tests.Verifiers.AnalyzerVerifier<ResultGenerator.Analysis.ResultDeclarationAnalyzer>;
 
-namespace ResultGenerator.Tests;
+namespace ResultGenerator.Tests.AnalyzerTests;
 
-public class AnalyzerTests
+public class ResultDeclaration
 {
     [Fact]
     public Task Reports_SpecifyResultDeclaration() => VerifyCS.VerifyAnalyzerAsync(Header + """
