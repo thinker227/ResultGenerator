@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using ResultGenerator.Helpers;
 
-namespace ResultGenerator.Models;
+namespace ResultGenerator.Generation.Models;
 
 internal readonly record struct ResultValue(
     string Name,

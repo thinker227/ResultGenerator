@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 using ResultGenerator.Helpers;
-using ResultGenerator.Models;
+using ResultGenerator.Generation.Models;
 
 namespace ResultGenerator.Generation;
 

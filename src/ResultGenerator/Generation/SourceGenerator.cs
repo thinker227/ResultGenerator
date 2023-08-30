@@ -1,6 +1,6 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using ResultGenerator.Models;
+using ResultGenerator.Generation.Models;
 
 namespace ResultGenerator.Generation;
 
