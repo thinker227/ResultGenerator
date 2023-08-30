@@ -58,7 +58,7 @@ public sealed class Analyzer : DiagnosticAnalyzer
 
                 {
                     var attributeMethodDeclaration = attributeSyntax
-                        .GetAncestorNode<MethodDeclarationSyntax>()!;
+                        .FirstAncestorOrSelf<MethodDeclarationSyntax>()!;
 
                     // Check whether the method syntax the attribute was applied to is the
                     // same as the method syntax which the method symbol represents.

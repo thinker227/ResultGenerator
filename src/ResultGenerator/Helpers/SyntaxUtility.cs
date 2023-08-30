@@ -16,19 +16,4 @@ public static class SyntaxUtility
 
     public static IEnumerable<AttributeListSyntax> GetResultDeclarations(this MethodDeclarationSyntax syntax) =>
         syntax.AttributeLists .Where(IsResultDeclaration);
-
-    public static TNode? GetAncestorNode<TNode>(this SyntaxNode node)
-        where TNode : SyntaxNode
-    {
-        var current = node.Parent;
-
-        while (current is not null)
-        {
-            if (current is TNode x) return x;
-
-            current = current.Parent;
-        }
-
-        return null;
-    }
 }
