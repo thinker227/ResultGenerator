@@ -13,7 +13,7 @@ internal readonly record struct ParameterType(
         SemanticModel semanticModel)
     {
         // Covered by diagnostic UnknownType.
-        if (GetTypeSymbolInfo(syntax, semanticModel) is not ITypeSymbol symbol) return null;
+        if (Result.GetTypeSymbolInfo(syntax, semanticModel) is not ITypeSymbol symbol) return null;
 
         var isNullableValueType = false;
         if (!symbol.IsReferenceType &&
@@ -39,18 +39,5 @@ internal readonly record struct ParameterType(
             fullyQualifiedName,
             isNullable,
             canBeNull);
-    }
-
-    public static ITypeSymbol? GetTypeSymbolInfo(
-        TypeSyntax syntax,
-        SemanticModel semanticModel)
-    {
-        var typeInfo = semanticModel.GetTypeInfo(syntax);
-        var type = typeInfo.Type;
-
-        // Filter out error types.
-        return type is not IErrorTypeSymbol
-            ? type
-            : null;
     }
 }

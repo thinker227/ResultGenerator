@@ -154,7 +154,7 @@ public sealed class Analyzer : DiagnosticAnalyzer
 
         if (ctorArgs is not AttributeCtorArgs.WithTypeName { TypeName: var typeName }) return;
 
-        if (!SyntaxUtility.IsValidIdentifier(typeName))
+        if (!Result.IsValidIdentifier(typeName))
         {
             var location = syntax.ArgumentList!.Arguments[0].Expression.GetLocation();
 
@@ -276,7 +276,7 @@ public sealed class Analyzer : DiagnosticAnalyzer
         SemanticModel semanticModel,
         TypeSyntax type)
     {
-        if (ParameterType.GetTypeSymbolInfo(type, semanticModel) is not null) return;
+        if (Result.GetTypeSymbolInfo(type, semanticModel) is not null) return;
 
         var location = type.GetLocation();
 

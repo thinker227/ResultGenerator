@@ -2,7 +2,7 @@ using Microsoft.CodeAnalysis;
 
 namespace ResultGenerator.Helpers;
 
-public static class SymbolUtility
+public static class Extensions
 {
     public static AttributeData? GetAttributeDataFor(
         this ISymbol symbol,

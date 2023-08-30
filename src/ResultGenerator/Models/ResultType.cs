@@ -25,7 +25,7 @@ internal readonly record struct ResultType(
         var name = GetResultTypeName(args, symbol);
 
         // Covered by diagnostic InvalidResultTypeName.
-        if (!SyntaxUtility.IsValidIdentifier(name)) return null;
+        if (!Result.IsValidIdentifier(name)) return null;
 
         var resultAttributeLists = node
             .GetResultDeclarations()
