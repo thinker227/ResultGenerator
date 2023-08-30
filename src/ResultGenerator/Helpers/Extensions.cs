@@ -15,4 +15,7 @@ public static class Extensions
             attr.AttributeClass?.Equals(attributeType, equalityComparer)
                 ?? false);
     }
+
+    public static bool IsNullableValueType(this INamedTypeSymbol symbol) =>
+        symbol.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T;
 }

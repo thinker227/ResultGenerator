@@ -1,5 +1,6 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using ResultGenerator.Helpers;
 
 namespace ResultGenerator.Generation.Models;
 
@@ -16,10 +17,8 @@ internal readonly record struct ParameterType(
         if (Result.GetTypeSymbolInfo(syntax, semanticModel) is not ITypeSymbol symbol) return null;
 
         var isNullableValueType = false;
-        if (!symbol.IsReferenceType &&
-            symbol is INamedTypeSymbol named &&
-            named.IsGenericType &&
-            named.ConstructedFrom.SpecialType == SpecialType.System_Nullable_T)
+        if (symbol is INamedTypeSymbol named &&
+            named.IsNullableValueType())
         {
             isNullableValueType = true;
             symbol = named.TypeArguments[0];
