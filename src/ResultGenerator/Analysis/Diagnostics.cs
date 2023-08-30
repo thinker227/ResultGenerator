@@ -85,4 +85,12 @@ public static class Diagnostics
         "ResultCorrectness",
         DiagnosticSeverity.Warning,
         isEnabledByDefault: true);
+
+    public static DiagnosticDescriptor ReplaceThrow { get; } = new(
+        "RESGEN0011",
+        "Replace throw with result type",
+        "Return a result type instead of throwing an exception",
+        "ResultQuality",
+        DiagnosticSeverity.Info,
+        isEnabledByDefault: true);
 }
