@@ -5,11 +5,11 @@ using ResultGenerator.Helpers;
 
 namespace ResultGenerator.Generation.Models;
 
-internal readonly record struct ResultValue(
+internal readonly record struct ResultValueModel(
     string Name,
-    EquatableArray<ValueParameter> Parameters)
+    EquatableArray<ValueParameterModel> Parameters)
 {
-    public static ResultValue? Create(
+    public static ResultValueModel? Create(
         AttributeSyntax syntax,
         SemanticModel semanticModel)
     {
@@ -22,11 +22,11 @@ internal readonly record struct ResultValue(
             return null;
 
         var parameters = syntax.ArgumentList?.Arguments
-            .Select(arg => ValueParameter.Create(arg, semanticModel))
+            .Select(arg => ValueParameterModel.Create(arg, semanticModel))
             .NotNull()
             .ToImmutableArray()
             .AsEquatableArray()
-            ?? ImmutableArray<ValueParameter>.Empty.AsEquatableArray();
+            ?? ImmutableArray<ValueParameterModel>.Empty.AsEquatableArray();
         
         return new(name, parameters);
     }

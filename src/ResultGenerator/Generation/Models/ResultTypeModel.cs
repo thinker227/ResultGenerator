@@ -5,11 +5,11 @@ using ResultGenerator.Helpers;
 
 namespace ResultGenerator.Generation.Models;
 
-internal readonly record struct ResultType(
+internal readonly record struct ResultTypeModel(
     string Name,
-    EquatableArray<ResultValue> Values)
+    EquatableArray<ResultValueModel> Values)
 {
-    public static ResultType? Create(
+    public static ResultTypeModel? Create(
         GeneratorAttributeSyntaxContext ctx)
     {
         // Only one attribute should be allowed per method.
@@ -38,7 +38,7 @@ internal readonly record struct ResultType(
         if (resultAttributeLists is not [var resultAttributeList, ..]) return null;
 
         var values = resultAttributeList.Attributes
-            .Select(attribute => ResultValue.Create(
+            .Select(attribute => ResultValueModel.Create(
                 attribute,
                 ctx.SemanticModel))
             .NotNull()

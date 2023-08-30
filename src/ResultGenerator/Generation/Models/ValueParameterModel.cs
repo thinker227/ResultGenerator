@@ -3,11 +3,11 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace ResultGenerator.Generation.Models;
 
-internal readonly record struct ValueParameter(
+internal readonly record struct ValueParameterModel(
     string Name,
-    ParameterType Type)
+    ParameterTypeModel Type)
 {
-    public static ValueParameter? Create(
+    public static ValueParameterModel? Create(
         AttributeArgumentSyntax argument,
         SemanticModel semanticModel)
     {
@@ -20,7 +20,7 @@ internal readonly record struct ValueParameter(
         })
             return null;
 
-        if (ParameterType.Create(typeSyntax, semanticModel) is not ParameterType type)
+        if (ParameterTypeModel.Create(typeSyntax, semanticModel) is not ParameterTypeModel type)
             return null;
 
         return new(name, type);

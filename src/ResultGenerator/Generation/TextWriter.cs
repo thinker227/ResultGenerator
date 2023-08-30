@@ -7,10 +7,10 @@ namespace ResultGenerator.Generation;
 internal sealed class TextWriter
 {
     private readonly CodeStringBuilder builder;
-    private readonly ResultType type;
-    private readonly IReadOnlyDictionary<ResultValue, int> valueIndicies;
+    private readonly ResultTypeModel type;
+    private readonly IReadOnlyDictionary<ResultValueModel, int> valueIndicies;
 
-    private TextWriter(CodeStringBuilder builder, ResultType type)
+    private TextWriter(CodeStringBuilder builder, ResultTypeModel type)
     {
         this.builder = builder;
         this.type = type;
@@ -22,7 +22,7 @@ internal sealed class TextWriter
                 x => x.index + 1);
     }
 
-    public static string Write(ResultType type)
+    public static string Write(ResultTypeModel type)
     {
         var builder = new CodeStringBuilder();
         var writer = new TextWriter(builder, type);
@@ -73,7 +73,7 @@ internal sealed class TextWriter
         }
     }
 
-    private void WriteField(ResultValue value)
+    private void WriteField(ResultValueModel value)
     {
         if (value.Parameters.IsEmpty)
         {
@@ -118,7 +118,7 @@ internal sealed class TextWriter
         builder.AppendLine();
     }
 
-    private void WriteCreateMethod(ResultValue value)
+    private void WriteCreateMethod(ResultValueModel value)
     {
         var index = valueIndicies[value];
         
@@ -137,14 +137,14 @@ internal sealed class TextWriter
         builder.Append($"({parameters}) => new({index}, {valueParameterName}: ({parameterNames}));");
     }
 
-    private void WriteIsProperties(ResultValue value)
+    private void WriteIsProperties(ResultValueModel value)
     {
         var index = valueIndicies[value];
 
         builder.Append($"public bool {GetIsPropertyName(value)} => this._flag == {index};");
     }
 
-    private void WriteTryAsMethods(ResultValue value)
+    private void WriteTryAsMethods(ResultValueModel value)
     {
         if (value.Parameters.IsEmpty)
         {
@@ -229,60 +229,60 @@ internal sealed class TextWriter
         }
     }
 
-    private static string GetTypeName(ResultType type) =>
+    private static string GetTypeName(ResultTypeModel type) =>
         $"@{type.Name}";
 
-    private static string GetParameterName(ValueParameter parameter) =>
+    private static string GetParameterName(ValueParameterModel parameter) =>
         $"@{CamelCase(parameter.Name)}";
 
-    private static string GetParameterName(ResultValue value) =>
+    private static string GetParameterName(ResultValueModel value) =>
         $"@{CamelCase(value.Name)}";
 
-    private static string GetFieldName(ResultValue value) =>
+    private static string GetFieldName(ResultValueModel value) =>
         $"_{CamelCase(value.Name)}Data";
 
-    private static string GetCreateMethodName(ResultValue value) =>
+    private static string GetCreateMethodName(ResultValueModel value) =>
         $"@{value.Name}";
 
-    private static string GetIsPropertyName(ResultValue value) =>
+    private static string GetIsPropertyName(ResultValueModel value) =>
         $"Is{value.Name}";
 
-    private static string GetTryAsMethodName(ResultValue value) =>
+    private static string GetTryAsMethodName(ResultValueModel value) =>
         $"TryAs{value.Name}";
 
     private static string CamelCase(string str) =>
         $"{char.ToLowerInvariant(str[0])}{str[1..]}";
 
-    private static string GetTypeString(ParameterType type) => type.IsNullable
+    private static string GetTypeString(ParameterTypeModel type) => type.IsNullable
         ? $"{type.FullyQualifiedName}?"
         : type.FullyQualifiedName;
 
-    private static string GetTupleOrRegularParameterTypeText(EquatableArray<ValueParameter> parameters) => parameters switch
+    private static string GetTupleOrRegularParameterTypeText(EquatableArray<ValueParameterModel> parameters) => parameters switch
     {
         [var param] => GetTypeString(param.Type),
         _ => $"({GetTypeListText(parameters)})",
     };
 
-    private static string GetParameterListText(EquatableArray<ValueParameter> parameters)
+    private static string GetParameterListText(EquatableArray<ValueParameterModel> parameters)
     {
         var texts = parameters
             .Select(p => $"{GetTypeString(p.Type)} {GetParameterName(p)}");
         return string.Join(", ", texts);
     }
 
-    private static string GetParameterNameListText(EquatableArray<ValueParameter> parameters)
+    private static string GetParameterNameListText(EquatableArray<ValueParameterModel> parameters)
     {
         var texts = parameters
             .Select(GetParameterName);
         return string.Join(", ", texts);
     }
 
-    private static string GetTupleOrRegularParameterNameListText(EquatableArray<ValueParameter> parameters) =>
+    private static string GetTupleOrRegularParameterNameListText(EquatableArray<ValueParameterModel> parameters) =>
         parameters is [var parameter]
             ? GetParameterName(parameter)
             : $"({GetParameterNameListText(parameters)})";
 
-    private static string GetTypeListText(EquatableArray<ValueParameter> parameters)
+    private static string GetTypeListText(EquatableArray<ValueParameterModel> parameters)
     {
         var typesTexts = parameters.Select(p => GetTypeString(p.Type));
         return string.Join(", ", typesTexts);

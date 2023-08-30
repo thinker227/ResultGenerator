@@ -4,12 +4,12 @@ using ResultGenerator.Helpers;
 
 namespace ResultGenerator.Generation.Models;
 
-internal readonly record struct ParameterType(
+internal readonly record struct ParameterTypeModel(
     string FullyQualifiedName,
     bool IsNullable,
     bool CanBeNull)
 {
-    public static ParameterType? Create(
+    public static ParameterTypeModel? Create(
         TypeSyntax syntax,
         SemanticModel semanticModel)
     {

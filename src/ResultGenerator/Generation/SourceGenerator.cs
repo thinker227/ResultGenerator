@@ -14,7 +14,7 @@ public sealed class SourceGenerator : IIncrementalGenerator
                 "ResultGenerator.ReturnsResultAttribute",
                 (node, _) => node is MethodDeclarationSyntax,
                 (syntaxCtx, _) =>
-                    ResultType.Create(syntaxCtx))
+                    ResultTypeModel.Create(syntaxCtx))
             .Where(model => model is not null)
             .Select((model, _) => model!.Value);
 
