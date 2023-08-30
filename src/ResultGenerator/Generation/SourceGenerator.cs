@@ -13,8 +13,22 @@ public sealed class SourceGenerator : IIncrementalGenerator
             .ForAttributeWithMetadataName(
                 "ResultGenerator.ReturnsResultAttribute",
                 (node, _) => node is MethodDeclarationSyntax,
-                (syntaxCtx, _) =>
-                    ResultTypeModel.Create(syntaxCtx))
+                ResultTypeModel? (syntaxCtx, _) =>
+                {
+                    var resultType = ResultType.Create(
+                        (IMethodSymbol)syntaxCtx.TargetSymbol,
+                        syntaxCtx.Attributes[0],
+                        syntaxCtx.SemanticModel,
+                        errorCallbacks: default,
+                        checkPartialDeclarations: false,
+                        parseInvalidDeclarations: false);
+
+                    // ResultType.Create only returns null in case a fatal parse
+                    // error occured, or if the method isn't a valid target at all.
+                    if (resultType is null) return null;
+
+                    return ResultTypeModel.From(resultType.Value);
+                })
             .Where(model => model is not null)
             .Select((model, _) => model!.Value);
 

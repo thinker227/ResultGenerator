@@ -9,13 +9,8 @@ internal readonly record struct ParameterTypeModel(
     bool IsNullable,
     bool CanBeNull)
 {
-    public static ParameterTypeModel? Create(
-        TypeSyntax syntax,
-        SemanticModel semanticModel)
+    public static ParameterTypeModel From(ITypeSymbol symbol, TypeSyntax syntax)
     {
-        // Covered by diagnostic UnknownType.
-        if (Result.GetTypeSymbolInfo(syntax, semanticModel) is not ITypeSymbol symbol) return null;
-
         var isNullableValueType = false;
         if (symbol is INamedTypeSymbol named &&
             named.IsNullableValueType())

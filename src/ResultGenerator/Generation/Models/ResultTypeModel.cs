@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using ResultGenerator.Helpers;
 
 namespace ResultGenerator.Generation.Models;
@@ -9,44 +8,14 @@ internal readonly record struct ResultTypeModel(
     string Name,
     EquatableArray<ResultValueModel> Values)
 {
-    public static ResultTypeModel? Create(
-        GeneratorAttributeSyntaxContext ctx)
+    public static ResultTypeModel From(ResultType resultType)
     {
-        // Only one attribute should be allowed per method.
-        // To improve error handling, if there are multiple attributes
-        // then the first one should be used.
-        if (ctx.Attributes is not [var attribute, ..]) return null;
-        var node = (MethodDeclarationSyntax)ctx.TargetNode;
-        var symbol = (IMethodSymbol)ctx.TargetSymbol;
-
-        // Covered by diagnostic InvalidAttributeCtor.
-        if (AttributeCtorArgs.Create(attribute) is not AttributeCtorArgs args) return null;
-
-        var name = Result.GetResultTypeName(args, symbol);
-
-        // Covered by diagnostic InvalidResultTypeName.
-        if (!Result.IsValidIdentifier(name)) return null;
-
-        var resultAttributeLists = node
-            .GetResultDeclarations()
-            .ToImmutableArray();
-
-        // Only one result declaration is allowed per method.
-        // To improve error handling, if there are multiple declarations
-        // then the first one should be used.
-        // Covered by diagnostics SpecifyResultDeclaration and TooManyResultDeclarations.
-        if (resultAttributeLists is not [var resultAttributeList, ..]) return null;
-
-        var values = resultAttributeList.Attributes
-            .Select(attribute => ResultValueModel.Create(
-                attribute,
-                ctx.SemanticModel))
-            .NotNull()
+        var name = resultType.Name;
+        var values = resultType.Values
+            .Select(ResultValueModel.From)
             .ToImmutableArray()
             .AsEquatableArray();
 
-        return new(
-            name,
-            values);
+        return new(name, values);
     }
 }

@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using ResultGenerator.Helpers;
 
 namespace ResultGenerator.Generation.Models;
@@ -9,25 +8,14 @@ internal readonly record struct ResultValueModel(
     string Name,
     EquatableArray<ValueParameterModel> Parameters)
 {
-    public static ResultValueModel? Create(
-        AttributeSyntax syntax,
-        SemanticModel semanticModel)
+    public static ResultValueModel From(ResultValue value)
     {
-        // Names other than simple names are not supported.
-        // Covered by diagnostic BadValueSyntax.
-        if (syntax.Name is not IdentifierNameSyntax
-        {
-            Identifier.Text: var name
-        })
-            return null;
-
-        var parameters = syntax.ArgumentList?.Arguments
-            .Select(arg => ValueParameterModel.Create(arg, semanticModel))
-            .NotNull()
+        var name = value.Name;
+        var parameters = value.Parameters
+            .Select(ValueParameterModel.From)
             .ToImmutableArray()
-            .AsEquatableArray()
-            ?? ImmutableArray<ValueParameterModel>.Empty.AsEquatableArray();
-        
+            .AsEquatableArray();
+
         return new(name, parameters);
     }
 }
