@@ -22,7 +22,7 @@ internal readonly record struct ResultType(
         // Covered by diagnostic InvalidAttributeCtor.
         if (AttributeCtorArgs.Create(attribute) is not AttributeCtorArgs args) return null;
 
-        var name = GetResultTypeName(args, symbol);
+        var name = Result.GetResultTypeName(args, symbol);
 
         // Covered by diagnostic InvalidResultTypeName.
         if (!Result.IsValidIdentifier(name)) return null;
@@ -49,13 +49,4 @@ internal readonly record struct ResultType(
             name,
             values);
     }
-
-    private static string GetResultTypeName(
-        AttributeCtorArgs args,
-        IMethodSymbol method) => args switch
-    {
-        AttributeCtorArgs.Empty => method.Name + "Result",
-        AttributeCtorArgs.WithTypeName x => x.TypeName,
-        _ => throw new InvalidOperationException(),
-    };
 }

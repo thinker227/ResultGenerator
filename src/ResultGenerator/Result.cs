@@ -25,6 +25,15 @@ internal static class Result
             : null;
     }
 
+    public static string GetResultTypeName(
+        AttributeCtorArgs args,
+        IMethodSymbol method) => args switch
+    {
+        AttributeCtorArgs.Empty => method.Name + "Result",
+        AttributeCtorArgs.WithTypeName x => x.TypeName,
+        _ => throw new InvalidOperationException(),
+    };
+
     public static bool IsValidIdentifier(string identifier) =>
         identifier.Length >= 1 &&
         SyntaxFacts.IsIdentifierStartCharacter(identifier[0]) &&
