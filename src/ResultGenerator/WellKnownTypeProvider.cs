@@ -1,6 +1,6 @@
 using Microsoft.CodeAnalysis;
 
-namespace ResultGenerator.Analysis;
+namespace ResultGenerator;
 
 internal record WellKnownTypeProvider(
     INamedTypeSymbol ReturnsResultAttribute)
