@@ -1,4 +1,4 @@
-using VerifyCS = ResultGenerator.Tests.Verifiers.AnalyzerVerifier<ResultGenerator.Analysis.ResultDeclarationAnalyzer>;
+using VerifyCS = ResultGenerator.Tests.Verifiers.AnalyzerVerifier<ResultGenerator.Analyzers.ResultDeclarationAnalyzer>;
 
 namespace ResultGenerator.Tests.AnalyzerTests;
 

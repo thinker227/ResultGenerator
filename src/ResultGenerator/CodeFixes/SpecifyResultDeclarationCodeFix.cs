@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Formatting;
-using ResultGenerator.Analysis;
+using ResultGenerator.Analyzers;
 
 namespace ResultGenerator.CodeFixes;
 
