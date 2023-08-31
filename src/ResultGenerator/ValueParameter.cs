@@ -1,5 +1,8 @@
+using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Text;
+using ResultGenerator.Analysis;
 
 namespace ResultGenerator;
 
@@ -23,15 +26,15 @@ internal readonly record struct ValueParameter(
     /// </summary>
     /// <param name="syntax">The original attribute argument syntax.</param>
     /// <param name="semanticModel">The semantic model for the operation.</param>
+    /// <param name="diagnostics">A list of diagnostics.</param>
     /// <param name="parseInvalidDeclarations">Whether to parse invalid declarations for error checking.</param>
-    /// <param name="errorCallbacks">The error callbacks to use for reporting errors.</param>
     /// <returns>The parsed value parameter,
     /// or <see langword="null"/> if it could not be parsed.</returns>
     public static ValueParameter? Create(
         AttributeArgumentSyntax syntax,
         SemanticModel semanticModel,
-        bool parseInvalidDeclarations,
-        ResultTypeErrorCallbacks errorCallbacks)
+        ImmutableArray<Diagnostic>.Builder? diagnostics,
+        bool parseInvalidDeclarations)
     {
         if (syntax.Expression is not GenericNameSyntax
         {
@@ -39,13 +42,26 @@ internal readonly record struct ValueParameter(
             TypeArgumentList.Arguments: [var typeSyntax, ..] typeArguments
         } nameSyntax)
         {
-            errorCallbacks.BadValueParameterSyntax?.Invoke(syntax, syntax.Expression);
+            var location = syntax.Expression.GetLocation();
+
+            diagnostics?.Add(Diagnostic.Create(
+                Diagnostics.BadValueParamaterSyntax,
+                location));
+            
             return null;
         }
 
         if (typeArguments.Count > 1)
         {
-            errorCallbacks.TooManyValueParameterTypes?.Invoke(syntax, syntax.Expression, typeArguments);
+            var start = typeArguments[1].Span.Start;
+            var end = typeArguments[^1].Span.End;
+            var location = Location.Create(
+                syntax.SyntaxTree,
+                TextSpan.FromBounds(start, end));
+
+            diagnostics?.Add(Diagnostic.Create(
+                Diagnostics.TooManyValueParameterTypes,
+                location));
 
             if (parseInvalidDeclarations)
             {
@@ -55,7 +71,7 @@ internal readonly record struct ValueParameter(
                     _ = ParseType(
                         arg,
                         semanticModel,
-                        errorCallbacks);
+                        diagnostics);
                 }
             }
         }
@@ -63,7 +79,7 @@ internal readonly record struct ValueParameter(
         var type = ParseType(
             typeSyntax,
             semanticModel,
-            errorCallbacks);
+            diagnostics);
 
         if (type is null) return null;
 
@@ -78,11 +94,17 @@ internal readonly record struct ValueParameter(
     private static ITypeSymbol? ParseType(
         TypeSyntax syntax,
         SemanticModel semanticModel,
-        ResultTypeErrorCallbacks errorCallbacks)
+        ImmutableArray<Diagnostic>.Builder? diagnostics)
     {
         if (Result.GetTypeSymbolInfo(syntax, semanticModel) is not ITypeSymbol symbol)
         {
-            errorCallbacks.UnknownType?.Invoke(syntax);
+            var location = syntax.GetLocation();
+
+            diagnostics?.Add(Diagnostic.Create(
+                Diagnostics.UnknownType,
+                location,
+                syntax.GetText().ToString()));
+            
             return null;
         }
 

@@ -18,11 +18,11 @@ public sealed class SourceGenerator : IIncrementalGenerator
                     var resultType = ResultTypeDeclaringMethod.Create(
                             (IMethodSymbol)syntaxCtx.TargetSymbol,
                             syntaxCtx.Attributes[0],
-                            errorCallbacks: default,
+                            diagnostics: null,
                             checkPartialDeclarations: false)?
                         .ToResultType(
                             syntaxCtx.SemanticModel,
-                            errorCallbacks: default,
+                            diagnostics: null,
                             parseInvalidDeclarations: false);
 
                     // ResultType.Create only returns null in case a fatal parse

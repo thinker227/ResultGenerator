@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using ResultGenerator.Analysis;
 using ResultGenerator.Helpers;
 
 namespace ResultGenerator;
@@ -23,7 +24,7 @@ internal readonly record struct ResultTypeDeclaringMethod(
     /// </summary>
     /// <param name="method">The method to try create the declaration from.</param>
     /// <param name="typeProvider">A provider for well-known type.</param>
-    /// <param name="errorCallbacks">The error callbacks to use for reporting errors.</param>
+    /// <param name="diagnostics">A list of diagnostics.</param>
     /// <param name="checkPartialDeclarations">Whether to check partial declarations
     /// of the method for potential errors.</param>
     /// <returns>The parsed declaration info,
@@ -31,7 +32,7 @@ internal readonly record struct ResultTypeDeclaringMethod(
     public static ResultTypeDeclaringMethod? Create(
         IMethodSymbol method,
         WellKnownTypeProvider typeProvider,
-        ResultTypeErrorCallbacks errorCallbacks,
+        ImmutableArray<Diagnostic>.Builder? diagnostics,
         bool checkPartialDeclarations = true)
     {
         // Get attribute data.
@@ -42,7 +43,7 @@ internal readonly record struct ResultTypeDeclaringMethod(
         return Create(
             method,
             attributeData,
-            errorCallbacks,
+            diagnostics,
             checkPartialDeclarations);
     }
     
@@ -51,7 +52,7 @@ internal readonly record struct ResultTypeDeclaringMethod(
     /// </summary>
     /// <param name="method">The method to try create the declaration from.</param>
     /// <param name="attributeData">The data for the declaring attribute.</param>
-    /// <param name="errorCallbacks">The error callbacks to use for reporting errors.</param>
+    /// <param name="diagnostics">A list of diagnostics.</param>
     /// <param name="checkPartialDeclarations">Whether to check partial declarations
     /// of the method for potential errors.</param>
     /// <returns>The parsed declaration info,
@@ -59,7 +60,7 @@ internal readonly record struct ResultTypeDeclaringMethod(
     public static ResultTypeDeclaringMethod? Create(
         IMethodSymbol method,
         AttributeData attributeData,
-        ResultTypeErrorCallbacks errorCallbacks,
+        ImmutableArray<Diagnostic>.Builder? diagnostics,
         bool checkPartialDeclarations = true)
     {
         // Only ordinary methods can be result type declarations.
@@ -90,11 +91,14 @@ internal readonly record struct ResultTypeDeclaringMethod(
 
         if (ctorArgs is null)
         {
-            errorCallbacks.InvalidAttributeCtor?.Invoke(
-                attributeData,
-                // Since an empty ctor is a valid ctor, the arguments cannot be null
-                // if the returned ctor args are null.
-                attributeSyntax.ArgumentList!);
+            // Since an empty ctor is a valid ctor, the arguments cannot be null
+            // if the returned ctor args are null.
+            var location = attributeSyntax.ArgumentList!.GetLocation();
+
+            diagnostics?.Add(Diagnostic.Create(
+                Diagnostics.InvalidAttributeCtor,
+                location));
+            
             return null;
         }
 
@@ -102,10 +106,15 @@ internal readonly record struct ResultTypeDeclaringMethod(
 
         if (!Result.IsValidIdentifier(name))
         {
-            errorCallbacks.InvalidTypeName?.Invoke(
-                attributeData,
-                attributeSyntax.ArgumentList!);
-            return null!;
+            var nameSyntax = attributeSyntax.ArgumentList!.Arguments[0].Expression;
+            var location = nameSyntax.GetLocation();
+
+            diagnostics?.Add(Diagnostic.Create(
+                Diagnostics.InvalidResultTypeName,
+                location,
+                nameSyntax));
+            
+            return null;
         }
 
         // Get result declarations.
@@ -113,17 +122,12 @@ internal readonly record struct ResultTypeDeclaringMethod(
             .GetResultDeclarations()
             .ToImmutableArray();
 
-        switch (declarations.Length)
+        if (declarations.Length == 0)
         {
-        // To improve error handling, if there are multiple declarations
-        // then the first one should be used.
-        case 0:
-            errorCallbacks.NoDeclarations?.Invoke(attributeData, methodSyntax);
+            diagnostics?.Add(Diagnostic.Create(
+                Diagnostics.SpecifyResultDeclaration,
+                methodSyntax.Identifier.GetLocation()));
             return null;
-        // Only one result declaration is allowed per method.
-        case > 1:
-            errorCallbacks.MultipleDeclarations?.Invoke(declarations);
-            break;
         }
 
         return new(
@@ -137,26 +141,33 @@ internal readonly record struct ResultTypeDeclaringMethod(
 
     public ResultType ToResultType(
         SemanticModel semanticModel,
-        ResultTypeErrorCallbacks errorCallbacks,
+        ImmutableArray<Diagnostic>.Builder? diagnostics,
         bool parseInvalidDeclarations = true)
     {
+        // To improve error handling, if there are multiple declarations
+        // then the first one should be used.
         var declaration = DeclarationSyntaxes[0];
         
         // Parse values.
         var values = ResultValue.ParseValues(
             declaration,
             semanticModel,
-            parseInvalidDeclarations,
-            errorCallbacks);
+            diagnostics,
+            parseInvalidDeclarations);
         
+        // Only one result declaration is allowed per method.
         foreach (var errorDecl in DeclarationSyntaxes.Skip(1))
         {
+            diagnostics?.Add(Diagnostic.Create(
+                Diagnostics.TooManyResultDeclarations,
+                errorDecl.GetLocation()));
+            
             // Run error checking for invalid declarations.
             _ = ResultValue.ParseValues(
                 errorDecl,
                 semanticModel,
-                parseInvalidDeclarations,
-                errorCallbacks);
+                diagnostics,
+                parseInvalidDeclarations);
         }
 
         return new(
