@@ -1,7 +1,5 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace ResultGenerator.Analyzers;
@@ -17,38 +15,22 @@ public sealed class CanBeInlinedAnalyzer : DiagnosticAnalyzer
         ctx.EnableConcurrentExecution();
         ctx.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         
-        ctx.RegisterCompilationStartAction(compilationCtx =>
+        ctx.RegisterResultDeclaringMethodAction(declaringMethodCtx =>
         {
-            var typeProvider = WellKnownTypeProvider.Create(compilationCtx.Compilation);
-            if (typeProvider is null) return;
-            
-            compilationCtx.RegisterSymbolStartAction(symbolStartCtx =>
+            declaringMethodCtx.RegisterResultDeclarationAction(resultDeclCtx =>
             {
-                var method = (IMethodSymbol)symbolStartCtx.Symbol;
-                
-                var declaringMethod = ResultTypeDeclaringMethod.Create(
-                    method,
-                    typeProvider,
+                var values = ResultValue.ParseValues(
+                    resultDeclCtx.Declaration,
+                    resultDeclCtx.SemanticModel,
                     null,
-                    checkPartialDeclarations: true);
+                    parseInvalidDeclarations: false);
 
-                if (declaringMethod is null) return;
-                
-                symbolStartCtx.RegisterResultDeclarationAction(resultDeclCtx =>
-                {
-                    var values = ResultValue.ParseValues(
-                        resultDeclCtx.Declaration,
-                        resultDeclCtx.SemanticModel,
-                        null,
-                        parseInvalidDeclarations: false);
+                if (values is not [var value]) return;
 
-                    if (values is not [var value]) return;
-
-                    resultDeclCtx.ReportDiagnostic(Diagnostic.Create(
-                        Diagnostics.CanBeInlined,
-                        value.Syntax.GetLocation()));
-                });
-            }, SymbolKind.Method);
+                resultDeclCtx.ReportDiagnostic(Diagnostic.Create(
+                    Diagnostics.CanBeInlined,
+                    value.Syntax.GetLocation()));
+            });
         });
     }
 }
