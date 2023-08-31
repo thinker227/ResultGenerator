@@ -37,9 +37,9 @@ public sealed class IgnoredDeclarationAnalyzer : DiagnosticAnalyzer
 
                 symbolStartCtx.RegisterResultDeclarationAction(resultDeclCtx =>
                 {
-                    resultDeclCtx.ReportDiagnostic(Diagnostic.Create(
+                    resultDeclCtx.syntaxNodeCtx.ReportDiagnostic(Diagnostic.Create(
                         Diagnostics.IgnoredResultDeclaration,
-                        resultDeclCtx.Declaration.GetLocation()));
+                        resultDeclCtx.declaration.GetLocation()));
                 });
             }, SymbolKind.Method);
         });

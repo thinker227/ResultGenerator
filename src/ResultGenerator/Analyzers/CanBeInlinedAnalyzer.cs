@@ -17,17 +17,17 @@ public sealed class CanBeInlinedAnalyzer : DiagnosticAnalyzer
         
         ctx.RegisterResultDeclaringMethodAction(declaringMethodCtx =>
         {
-            declaringMethodCtx.RegisterResultDeclarationAction(resultDeclCtx =>
+            declaringMethodCtx.symbolStartCtx.RegisterResultDeclarationAction(resultDeclCtx =>
             {
                 var values = ResultValue.ParseValues(
-                    resultDeclCtx.Declaration,
-                    resultDeclCtx.SemanticModel,
+                    resultDeclCtx.declaration,
+                    resultDeclCtx.syntaxNodeCtx.SemanticModel,
                     null,
                     parseInvalidDeclarations: false);
 
                 if (values is not [var value]) return;
 
-                resultDeclCtx.ReportDiagnostic(Diagnostic.Create(
+                resultDeclCtx.syntaxNodeCtx.ReportDiagnostic(Diagnostic.Create(
                     Diagnostics.CanBeInlined,
                     value.Syntax.GetLocation()));
             });
