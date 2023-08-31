@@ -34,26 +34,20 @@ public sealed class CanBeInlinedAnalyzer : DiagnosticAnalyzer
 
                 if (declaringMethod is null) return;
                 
-                symbolStartCtx.RegisterSyntaxNodeAction(syntaxNodeCtx =>
+                symbolStartCtx.RegisterResultDeclarationAction(resultDeclCtx =>
                 {
-                    var declaration = (AttributeListSyntax)
-                        syntaxNodeCtx.Node;
-
-                    // Ignore if attribute list is not a result declaration.
-                    if (!declaration.IsResultDeclaration()) return;
-
                     var values = ResultValue.ParseValues(
-                        declaration,
-                        syntaxNodeCtx.SemanticModel,
+                        resultDeclCtx.Declaration,
+                        resultDeclCtx.SemanticModel,
                         null,
                         parseInvalidDeclarations: false);
 
                     if (values is not [var value]) return;
 
-                    syntaxNodeCtx.ReportDiagnostic(Diagnostic.Create(
+                    resultDeclCtx.ReportDiagnostic(Diagnostic.Create(
                         Diagnostics.CanBeInlined,
                         value.Syntax.GetLocation()));
-                }, SyntaxKind.AttributeList);
+                });
             }, SymbolKind.Method);
         });
     }

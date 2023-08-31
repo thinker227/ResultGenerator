@@ -38,18 +38,12 @@ public sealed class IgnoredDeclarationAnalyzer : DiagnosticAnalyzer
                     checkPartialDeclarations: true);
                 if (declaringMethod is null) return;
 
-                symbolStartCtx.RegisterSyntaxNodeAction(syntaxNodeCtx =>
+                symbolStartCtx.RegisterResultDeclarationAction(resultDeclCtx =>
                 {
-                    var declaration = (AttributeListSyntax)
-                        syntaxNodeCtx.Node;
-
-                    // Ignore if attribute list is not a result declaration.
-                    if (!declaration.IsResultDeclaration()) return;
-                    
-                    syntaxNodeCtx.ReportDiagnostic(Diagnostic.Create(
+                    resultDeclCtx.ReportDiagnostic(Diagnostic.Create(
                         Diagnostics.IgnoredResultDeclaration,
-                        declaration.GetLocation()));
-                }, SyntaxKind.AttributeList);
+                        resultDeclCtx.Declaration.GetLocation()));
+                });
             }, SymbolKind.Method);
         });
     }
