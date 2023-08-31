@@ -21,7 +21,7 @@ public sealed class ResultDeclarationAnalyzer : DiagnosticAnalyzer
 
     public override void Initialize(AnalysisContext ctx)
     {
-        // ctx.EnableConcurrentExecution();
+        ctx.EnableConcurrentExecution();
         ctx.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
 
         ctx.RegisterTypeProviderAction(typeProviderCtx =>
