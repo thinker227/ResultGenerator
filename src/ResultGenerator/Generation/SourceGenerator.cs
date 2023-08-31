@@ -15,13 +15,15 @@ public sealed class SourceGenerator : IIncrementalGenerator
                 (node, _) => node is MethodDeclarationSyntax,
                 (syntaxCtx, _) =>
                 {
-                    var resultType = ResultType.Create(
-                        (IMethodSymbol)syntaxCtx.TargetSymbol,
-                        syntaxCtx.Attributes[0],
-                        syntaxCtx.SemanticModel,
-                        errorCallbacks: default,
-                        checkPartialDeclarations: false,
-                        parseInvalidDeclarations: false);
+                    var resultType = ResultTypeDeclaringMethod.Create(
+                            (IMethodSymbol)syntaxCtx.TargetSymbol,
+                            syntaxCtx.Attributes[0],
+                            errorCallbacks: default,
+                            checkPartialDeclarations: false)?
+                        .ToResultType(
+                            syntaxCtx.SemanticModel,
+                            errorCallbacks: default,
+                            parseInvalidDeclarations: false);
 
                     // ResultType.Create only returns null in case a fatal parse
                     // error occured, or if the method isn't a valid target at all.
