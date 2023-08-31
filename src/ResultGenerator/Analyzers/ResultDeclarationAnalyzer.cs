@@ -24,12 +24,9 @@ public sealed class ResultDeclarationAnalyzer : DiagnosticAnalyzer
         // ctx.EnableConcurrentExecution();
         ctx.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
 
-        ctx.RegisterCompilationStartAction(compilationCtx =>
+        ctx.RegisterTypeProviderAction(typeProviderCtx =>
         {
-            var typeProvider = WellKnownTypeProvider.Create(compilationCtx.Compilation);
-            if (typeProvider is null) return;
-
-            compilationCtx.RegisterSymbolStartAction(symbolStartCtx =>
+            typeProviderCtx.compilationCtx.RegisterSymbolStartAction(symbolStartCtx =>
             {
                 var method = (IMethodSymbol)symbolStartCtx.Symbol;
                 
@@ -39,7 +36,7 @@ public sealed class ResultDeclarationAnalyzer : DiagnosticAnalyzer
                     var declarationDiagnostics = ImmutableArray.CreateBuilder<Diagnostic>();
                     ResultTypeDeclaringMethod.Create(
                         method,
-                        typeProvider,
+                        typeProviderCtx.typeProvider,
                         declarationDiagnostics,
                         checkPartialDeclarations: true);
 

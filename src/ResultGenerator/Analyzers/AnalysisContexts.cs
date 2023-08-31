@@ -58,21 +58,30 @@ internal readonly struct ResultDeclarationAnalysisContext
 
 internal static class AnalysisContextExtensions
 {
-    #pragma warning disable RS1012
+#pragma warning disable RS1012
+
+    public static void RegisterTypeProviderAction(
+        this AnalysisContext ctx,
+        Action<(WellKnownTypeProvider typeProvider, CompilationStartAnalysisContext compilationCtx)> analyze) =>
+        ctx.RegisterCompilationStartAction(compilationCtx =>
+        {
+            var typeProvider = WellKnownTypeProvider.Create(compilationCtx.Compilation);
+            if (typeProvider is null) return;
+
+            analyze((typeProvider, compilationCtx));
+        });
+    
     public static void RegisterResultDeclaringMethodAction(
         this AnalysisContext ctx,
-        Action<ResultDeclaringMethodAnalysisContext> analyze) => ctx.RegisterCompilationStartAction(compilationCtx =>
+        Action<ResultDeclaringMethodAnalysisContext> analyze) => ctx.RegisterTypeProviderAction(typeProvierCtx =>
     {
-        var typeProvider = WellKnownTypeProvider.Create(compilationCtx.Compilation);
-        if (typeProvider is null) return;
-        
-        ctx.RegisterSymbolStartAction(symbolStartCtx =>
+        typeProvierCtx.compilationCtx.RegisterSymbolStartAction(symbolStartCtx =>
         {
             var method = (IMethodSymbol)symbolStartCtx.Symbol;
                 
             var declaringMethod = ResultTypeDeclaringMethod.Create(
                 method,
-                typeProvider,
+                typeProvierCtx.typeProvider,
                 null,
                 checkPartialDeclarations: true);
 

@@ -18,12 +18,9 @@ public sealed class IgnoredDeclarationAnalyzer : DiagnosticAnalyzer
         ctx.EnableConcurrentExecution();
         ctx.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         
-        ctx.RegisterCompilationStartAction(compilationCtx =>
+        ctx.RegisterTypeProviderAction(typeProviderCtx =>
         {
-            var typeProvider = WellKnownTypeProvider.Create(compilationCtx.Compilation);
-            if (typeProvider is null) return;
-            
-            compilationCtx.RegisterSymbolStartAction(symbolStartCtx =>
+            typeProviderCtx.compilationCtx.RegisterSymbolStartAction(symbolStartCtx =>
             {
                 var method = (IMethodSymbol)symbolStartCtx.Symbol;
                 
@@ -33,7 +30,7 @@ public sealed class IgnoredDeclarationAnalyzer : DiagnosticAnalyzer
                 // Check whether the other partial part declares a result type.
                 var declaringMethod = ResultTypeDeclaringMethod.Create(
                     otherPartialPart,
-                    typeProvider,
+                    typeProviderCtx.typeProvider,
                     null,
                     checkPartialDeclarations: true);
                 if (declaringMethod is null) return;
