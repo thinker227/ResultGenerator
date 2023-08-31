@@ -102,6 +102,7 @@ internal readonly record struct ResultTypeDeclaringMethod(
             return null;
         }
 
+        // Get name.
         var name = Result.GetResultTypeName(ctorArgs, method);
 
         if (!Result.IsValidIdentifier(name))
@@ -122,12 +123,24 @@ internal readonly record struct ResultTypeDeclaringMethod(
             .GetResultDeclarations()
             .ToImmutableArray();
 
-        if (declarations.Length == 0)
+        switch (declarations.Length)
         {
+        case 0:
+            // If there is no declaration, there is nothing more to do.
             diagnostics?.Add(Diagnostic.Create(
                 Diagnostics.SpecifyResultDeclaration,
                 methodSyntax.Identifier.GetLocation()));
             return null;
+        case > 1:
+            // Only one result declaration is allowed per method.
+            foreach (var errorDecl in declarations.Skip(1))
+            {
+                diagnostics?.Add(Diagnostic.Create(
+                    Diagnostics.TooManyResultDeclarations,
+                    errorDecl.GetLocation()));
+            }
+
+            break;
         }
 
         return new(
