@@ -1,7 +1,6 @@
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Diagnostics;
 
-namespace ResultGenerator.Analysis;
+namespace ResultGenerator;
 
 public static class Diagnostics
 {

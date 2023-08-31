@@ -1,7 +1,6 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using ResultGenerator.Analysis;
 using ResultGenerator.Helpers;
 
 namespace ResultGenerator;
