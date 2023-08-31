@@ -59,16 +59,6 @@ public class ResultDeclaration
     """);
 
     [Fact]
-    public Task Reports_CanBeInlined() => VerifyCS.VerifyAnalyzerAsync(Header + """
-    public sealed class Class
-    {
-        [ReturnsResult]
-        [result: {|RESGEN0005:A|}]
-        public void Foo() {}
-    }
-    """);
-
-    [Fact]
     public Task Reports_BadValueSyntax_ForSimpleValues() => VerifyCS.VerifyAnalyzerAsync(Header + """
     public sealed class Class
     {
@@ -125,22 +115,6 @@ public class ResultDeclaration
         [ReturnsResult]
         [result: A(X<{|RESGEN0009:Foo|}>), B]
         public void Foo() {}
-    } 
-    """);
-
-    [Fact]
-    public Task Reports_IgnoredResultDeclaration() => VerifyCS.VerifyAnalyzerAsync(Header + """
-    public sealed partial class Class
-    {
-        [ReturnsResult]
-        [result: A, B]
-        public partial void Foo();
-    }
-
-    public sealed partial class Class
-    {
-        {|RESGEN0010:[result: C, D]|}
-        public partial void Foo() {}
     } 
     """);
 }

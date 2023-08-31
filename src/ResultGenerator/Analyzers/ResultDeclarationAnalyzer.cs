@@ -14,24 +14,19 @@ public sealed class ResultDeclarationAnalyzer : DiagnosticAnalyzer
         Diagnostics.TooManyResultDeclarations,
         Diagnostics.InvalidResultTypeName,
         Diagnostics.InvalidAttributeCtor,
-        Diagnostics.CanBeInlined,
         Diagnostics.BadValueSyntax,
         Diagnostics.BadValueParamaterSyntax,
         Diagnostics.TooManyValueParameterTypes,
-        Diagnostics.UnknownType,
-        Diagnostics.IgnoredResultDeclaration);
+        Diagnostics.UnknownType);
 
     public override void Initialize(AnalysisContext ctx)
     {
         ctx.EnableConcurrentExecution();
         ctx.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
 
-        ctx.RegisterCompilationStartAction(compilationCtx =>
+        ctx.RegisterTypeProviderAction(typeProviderCtx =>
         {
-            var typeProvider = WellKnownTypeProvider.Create(compilationCtx.Compilation);
-            if (typeProvider is null) return;
-
-            compilationCtx.RegisterSymbolStartAction(symbolStartCtx =>
+            typeProviderCtx.compilationCtx.RegisterSymbolStartAction(symbolStartCtx =>
             {
                 var method = (IMethodSymbol)symbolStartCtx.Symbol;
                 
@@ -41,7 +36,7 @@ public sealed class ResultDeclarationAnalyzer : DiagnosticAnalyzer
                     var declarationDiagnostics = ImmutableArray.CreateBuilder<Diagnostic>();
                     ResultTypeDeclaringMethod.Create(
                         method,
-                        typeProvider,
+                        typeProviderCtx.typeProvider,
                         declarationDiagnostics,
                         checkPartialDeclarations: true);
 
