@@ -18,8 +18,7 @@ public sealed class ResultDeclarationAnalyzer : DiagnosticAnalyzer
         Diagnostics.BadValueSyntax,
         Diagnostics.BadValueParamaterSyntax,
         Diagnostics.TooManyValueParameterTypes,
-        Diagnostics.UnknownType,
-        Diagnostics.IgnoredResultDeclaration);
+        Diagnostics.UnknownType);
 
     public override void Initialize(AnalysisContext ctx)
     {
