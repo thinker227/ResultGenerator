@@ -59,16 +59,6 @@ public class ResultDeclaration
     """);
 
     [Fact]
-    public Task Reports_CanBeInlined() => VerifyCS.VerifyAnalyzerAsync(Header + """
-    public sealed class Class
-    {
-        [ReturnsResult]
-        [result: {|RESGEN0005:A|}]
-        public void Foo() {}
-    }
-    """);
-
-    [Fact]
     public Task Reports_BadValueSyntax_ForSimpleValues() => VerifyCS.VerifyAnalyzerAsync(Header + """
     public sealed class Class
     {

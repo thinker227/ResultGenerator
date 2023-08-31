@@ -14,7 +14,6 @@ public sealed class ResultDeclarationAnalyzer : DiagnosticAnalyzer
         Diagnostics.TooManyResultDeclarations,
         Diagnostics.InvalidResultTypeName,
         Diagnostics.InvalidAttributeCtor,
-        Diagnostics.CanBeInlined,
         Diagnostics.BadValueSyntax,
         Diagnostics.BadValueParamaterSyntax,
         Diagnostics.TooManyValueParameterTypes,
