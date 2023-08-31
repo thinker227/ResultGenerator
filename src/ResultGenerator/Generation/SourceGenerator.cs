@@ -10,10 +10,10 @@ public sealed class SourceGenerator : IIncrementalGenerator
     public void Initialize(IncrementalGeneratorInitializationContext ctx)
     {
         var types = ctx.SyntaxProvider
-            .ForAttributeWithMetadataName(
+            .ForAttributeWithMetadataName<ResultTypeModel?>(
                 "ResultGenerator.ReturnsResultAttribute",
                 (node, _) => node is MethodDeclarationSyntax,
-                ResultTypeModel? (syntaxCtx, _) =>
+                (syntaxCtx, _) =>
                 {
                     var resultType = ResultType.Create(
                         (IMethodSymbol)syntaxCtx.TargetSymbol,
