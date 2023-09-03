@@ -38,6 +38,51 @@ public class ToResult
     """);
 
     [Fact]
+    public Task Refactors_MultipleVoidReturns() => VerifyCS.VerifyRefactoringAsync(Header + """
+    public sealed class Class
+    {
+        public void F$$oo(bool a, bool b)
+        {
+            if (!a)
+            {
+                return;
+            }
+
+            if (b)
+            {
+                if (a)
+                {
+                    return;
+                }
+            }
+        }
+    }
+    """, Header + """
+    public sealed class Class
+    {
+        [ReturnsResult]
+        [result: Ok, Error]
+        public FooResult Foo(bool a, bool b)
+        {
+            if (!a)
+            {
+                return FooResult.Ok();
+            }
+
+            if (b)
+            {
+                if (a)
+                {
+                    return FooResult.Ok();
+                }
+            }
+
+            return FooResult.Ok();
+        }
+    }
+    """);
+
+    [Fact]
     public Task Refactors_TypeReturn() => VerifyCS.VerifyRefactoringAsync(Header + """
     public sealed class Class
     {
