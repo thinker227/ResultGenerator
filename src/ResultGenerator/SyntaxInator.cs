@@ -55,13 +55,16 @@ internal static class SyntaxInator
                 AttributeTargetSpecifier(
                     Identifier("result")));
 
-    public static ExpressionSyntax WrapExpressionWithOk(string resultTypeName, ExpressionSyntax? expression)
-    {
-        var invocation = InvocationExpression(
+    public static InvocationExpressionSyntax OkCall(string resultTypeName) =>
+        InvocationExpression(
             MemberAccessExpression(
                 SyntaxKind.SimpleMemberAccessExpression,
                 IdentifierName(resultTypeName),
                 IdentifierName("Ok")));
+
+    public static ExpressionSyntax WrapExpressionWithOk(string resultTypeName, ExpressionSyntax? expression)
+    {
+        var invocation = OkCall(resultTypeName);
 
         var argumentList = expression is not null
             ? SingletonSeparatedList(
