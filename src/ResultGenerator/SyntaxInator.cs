@@ -1,12 +1,31 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace ResultGenerator.Refactorings;
+namespace ResultGenerator;
 
+/// <summary>
+/// Helper for producing syntax nodes.
+/// </summary>
+/// <remarks>
+/// Code generated using https://roslynquoter.azurewebsites.net/.
+/// </remarks>
 internal static class SyntaxInator
 {
+    public static AttributeListSyntax DefaultResultDeclaration() =>
+        AttributeList(
+            SeparatedList<AttributeSyntax>(
+                new SyntaxNodeOrToken[]{
+                    Attribute(
+                        IdentifierName("Ok")),
+                    Token(SyntaxKind.CommaToken),
+                    Attribute(
+                        IdentifierName("Error"))}))
+        .WithTarget(
+            AttributeTargetSpecifier(
+                Identifier("result")));
+
     public static AttributeListSyntax ReturnsResultAttribute() =>
         AttributeList(
             SingletonSeparatedList(
