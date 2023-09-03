@@ -13,47 +13,39 @@ namespace ResultGenerator;
 /// </remarks>
 internal static class SyntaxInator
 {
-    public static AttributeListSyntax DefaultResultDeclaration() =>
-        AttributeList(
-            SeparatedList<AttributeSyntax>(
-                new SyntaxNodeOrToken[]{
-                    Attribute(
-                        IdentifierName("Ok")),
-                    Token(SyntaxKind.CommaToken),
-                    Attribute(
-                        IdentifierName("Error"))}))
-        .WithTarget(
-            AttributeTargetSpecifier(
-                Identifier("result")));
-
     public static AttributeListSyntax ReturnsResultAttribute() =>
         AttributeList(
             SingletonSeparatedList(
                 Attribute(
                     IdentifierName("ReturnsResult"))));
 
-    public static AttributeListSyntax DefaultResultDeclarationWithParameter(TypeSyntax okParameterType) =>
-        AttributeList(
-                SeparatedList<AttributeSyntax>(
-                    new SyntaxNodeOrToken[]{
-                        Attribute(
-                            IdentifierName("Ok"))
-                        .WithArgumentList(
-                            AttributeArgumentList(
+    public static AttributeListSyntax DefaultResultDeclaration(TypeSyntax? okParameterType = null)
+    {
+        var okArgumentList = okParameterType is null
+            ? null
+            : AttributeArgumentList(
+                SingletonSeparatedList(
+                    AttributeArgument(
+                        GenericName(
+                            Identifier("Value"))
+                        .WithTypeArgumentList(
+                            TypeArgumentList(
                                 SingletonSeparatedList(
-                                    AttributeArgument(
-                                        GenericName(
-                                            Identifier("Value"))
-                                        .WithTypeArgumentList(
-                                            TypeArgumentList(
-                                                SingletonSeparatedList(
-                                                    okParameterType))))))),
-                        Token(SyntaxKind.CommaToken),
-                        Attribute(
-                            IdentifierName("Error"))}))
-            .WithTarget(
-                AttributeTargetSpecifier(
-                    Identifier("result")));
+                                    okParameterType))))));
+
+        return AttributeList(
+            SeparatedList<AttributeSyntax>(
+                new SyntaxNodeOrToken[]{
+                    Attribute(
+                        IdentifierName("Ok"))
+                    .WithArgumentList(okArgumentList),
+                    Token(SyntaxKind.CommaToken),
+                    Attribute(
+                        IdentifierName("Error"))}))
+        .WithTarget(
+            AttributeTargetSpecifier(
+                Identifier("result")));
+    }
 
     public static InvocationExpressionSyntax OkCall(string resultTypeName) =>
         InvocationExpression(
