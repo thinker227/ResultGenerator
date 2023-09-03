@@ -59,7 +59,10 @@ public sealed class ToResultRefactoring : CodeRefactoringProvider
         var returnsResultAttribute = SyntaxInator.ReturnsResultAttribute()
             .WithAdditionalAnnotations(Formatter.Annotation);
 
-        var resultDeclaration = SyntaxInator.DefaultResultDeclarationWithParameter(returnType)
+        var resultDeclaration = SyntaxInator.DefaultResultDeclaration(
+                methodSymbol.ReturnsVoid
+                    ? null
+                    : returnType)
             .WithAdditionalAnnotations(Formatter.Annotation);
 
         // Change return type.
