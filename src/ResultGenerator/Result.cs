@@ -25,11 +25,14 @@ internal static class Result
             : null;
     }
 
+    public static string GetResultTypeName(IMethodSymbol method) =>
+        method.Name + "Result"; 
+
     public static string GetResultTypeName(
         AttributeCtorArgs args,
         IMethodSymbol method) => args switch
     {
-        AttributeCtorArgs.Empty => method.Name + "Result",
+        AttributeCtorArgs.Empty => GetResultTypeName(method),
         AttributeCtorArgs.WithTypeName x => x.TypeName,
         _ => throw new InvalidOperationException(),
     };
