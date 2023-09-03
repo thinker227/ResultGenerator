@@ -81,14 +81,23 @@ public sealed class ToResultRefactoring : CodeRefactoringProvider
         else if (methodDeclaration.Body is BlockSyntax body &&
             semanticModel.GetOperation(body, cts) is IBlockOperation bodyOperation)
         {
-            var returnStatements = bodyOperation.Descendants()
+            var operations = bodyOperation.Operations;
+
+            var returnStatements = operations
                 .OfType<IReturnOperation>()
                 .Select(ret => (ReturnStatementSyntax)ret.Syntax);
             
             newBody = body.ReplaceNodes(
                 returnStatements,
-                (node, _) => UpdateReturnStatement(node, name)
-                    .WithAdditionalAnnotations(Formatter.Annotation));
+                (node, _) => UpdateReturnStatement(node, name));
+
+            var hasTrailingReturn = !operations.IsEmpty && operations[^1] is IReturnOperation;
+            if (methodSymbol.ReturnsVoid && !hasTrailingReturn)
+            {
+                newBody = newBody.AddStatements(
+                    SyntaxFactory.ReturnStatement(
+                        SyntaxInator.OkCall(name)));
+            }
         }
 
         var newMethodDeclaration = methodDeclaration
@@ -97,7 +106,7 @@ public sealed class ToResultRefactoring : CodeRefactoringProvider
                 resultDeclaration)
             .WithReturnType(newReturnType)
             .WithExpressionBody(newExpressionBody)
-            .WithBody(newBody);
+            .WithBody(newBody?.WithAdditionalAnnotations(Formatter.Annotation));
 
         var oldRoot = await document.GetSyntaxRootAsync(cts);
         var newRoot = oldRoot!.ReplaceNode(methodDeclaration, newMethodDeclaration);
